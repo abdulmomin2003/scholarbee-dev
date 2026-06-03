@@ -6,7 +6,6 @@ import { University, UniversitySchema } from 'src/universities/schemas/universit
 import { Application, ApplicationSchema } from 'src/applications/schemas/application.schema';
 import { UserEvent, UserEventSchema } from './schemas/user-event.schema';
 import { RecommendationsController } from './recommendations.controller';
-import { AdminMlController } from './admin-ml.controller';
 import { RecommendationService } from './services/recommendation.service';
 import { ScoringEngineService } from './services/scoring-engine.service';
 import { UserEventService } from './services/user-event.service';
@@ -16,11 +15,6 @@ import { BayesianWeightService } from './services/bayesian-weight.service';
 import { RecommendationCacheService } from './recommendation-cache.service';
 import { StudentContextCacheService } from './student-context-cache.service';
 import { RecommendationCronService } from './services/recommendation-cron.service';
-import { Impression, ImpressionSchema } from './schemas/impression.schema';
-import { ImpressionService } from './services/impression.service';
-import { ImpressionCronService } from './cron/impression-cron.service';
-import { MlShadowComparison, MlShadowComparisonSchema } from './schemas/ml-shadow-comparison.schema';
-import { MLScorerService } from './services/ml-scorer.service';
 
 // Additional referenced schemas for lightweight pre-queries in scoring engine
 import { Admission, AdmissionSchema } from 'src/admissions/schemas/admission.schema';
@@ -42,11 +36,9 @@ import { Address, AddressSchema } from 'src/addresses/schemas/address.schema';
       { name: ProgramTemplate.name, schema: ProgramTemplateSchema },
       { name: Campus.name, schema: CampusSchema },
       { name: Address.name, schema: AddressSchema },
-      { name: Impression.name, schema: ImpressionSchema },
-      { name: MlShadowComparison.name, schema: MlShadowComparisonSchema },
     ]),
   ],
-  controllers: [RecommendationsController, AdminMlController],
+  controllers: [RecommendationsController],
   providers: [
     RecommendationService,
     ScoringEngineService,
@@ -57,9 +49,6 @@ import { Address, AddressSchema } from 'src/addresses/schemas/address.schema';
     RecommendationCacheService,
     StudentContextCacheService,
     RecommendationCronService,
-    ImpressionService,
-    ImpressionCronService,
-    MLScorerService,
   ],
   exports: [
     RecommendationService,
@@ -69,8 +58,6 @@ import { Address, AddressSchema } from 'src/addresses/schemas/address.schema';
     RecommendationCacheService,
     StudentContextCacheService,
     RecommendationCronService,
-    ImpressionService,
-    MLScorerService,
   ],
 })
 export class RecommendationsModule {}

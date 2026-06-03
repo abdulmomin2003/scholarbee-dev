@@ -96,7 +96,7 @@ const ApplyForAdmission = ({
 
   const handleApplyForAdmission = useCallback(async () => {
     try {
-      // Track ML apply event
+      // Track apply event
       trackEvent({
         event_type: 'apply',
         resource_type: 'admission_program',

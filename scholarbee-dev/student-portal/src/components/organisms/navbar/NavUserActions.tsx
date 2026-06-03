@@ -18,7 +18,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import Cookies from 'js-cookie';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 
 import { RootState } from '@/redux/store';
 import {
@@ -255,23 +254,6 @@ const NavUserActions = ({
 
     return (
       <Stack direction="row" ml={2} alignItems="center">
-        {/* ML Dashboard Icon for Admins */}
-        {isAdmin && (
-          <Link href="/admin/ml-dashboard" style={{ textDecoration: 'none' }} passHref>
-            <Box
-              sx={{
-                ...classes.iconBox,
-                mr: 1,
-                backgroundColor: pathname === '/admin/ml-dashboard' ? COLORS.bgBlue : 'transparent'
-              }}
-            >
-              <IconButton size="large" aria-label="ml dashboard" sx={{ borderRadius: 2 }}>
-                <PsychologyIcon sx={{ color: pathname === '/admin/ml-dashboard' ? COLORS.primary : COLORS.textSecondary }} />
-              </IconButton>
-            </Box>
-          </Link>
-        )}
-
         {/* Chat Icon */}
         <Link href="/chat" style={{ textDecoration: 'none' }} passHref>
           <Box

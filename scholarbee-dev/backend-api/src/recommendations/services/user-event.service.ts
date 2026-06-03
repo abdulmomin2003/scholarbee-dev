@@ -10,7 +10,6 @@ import { RecommendationCacheService } from '../recommendation-cache.service';
 import { StudentContextCacheService } from '../student-context-cache.service';
 import { RecommendationService } from './recommendation.service';
 import { RecommendationType } from '../dto/get-recommendations.dto';
-import { ImpressionService } from './impression.service';
 
 @Injectable()
 export class UserEventService {
@@ -28,7 +27,6 @@ export class UserEventService {
     private readonly studentContextCacheService: StudentContextCacheService,
     @Inject(forwardRef(() => RecommendationService))
     private readonly recommendationService: RecommendationService,
-    private readonly impressionService: ImpressionService,
   ) {}
 
   /**
@@ -89,27 +87,15 @@ export class UserEventService {
             const student = await this.userModel.findById(userId).exec();
             if (student) {
               let action: 'click' | 'favorite' | 'apply' | 'ignore' = 'click';
-              let recordableAction: 'click' | 'favorite' | 'apply' | null = null;
               
               if (payload.event_type === UserRecommendationEventType.FAVORITE) {
                 action = 'favorite';
-                recordableAction = 'favorite';
               } else if (payload.event_type === UserRecommendationEventType.APPLY) {
                 action = 'apply';
-                recordableAction = 'apply';
               } else if (payload.event_type === UserRecommendationEventType.CLICK) {
                 action = 'click';
-                recordableAction = 'click';
               } else {
                 action = 'click'; // default
-              }
-
-              if (recordableAction) {
-                this.impressionService.recordAction(
-                  userId,
-                  payload.resource_id,
-                  recordableAction
-                ).catch(err => this.logger.warn(`Failed to record action: ${err.message}`));
               }
 
               const updatedPriors = this.bayesianWeightService.updateWeights(

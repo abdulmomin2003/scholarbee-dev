@@ -8,8 +8,6 @@ import { GetRecommendationsDto, RecommendationType } from '../dto/get-recommenda
 import { Application } from 'src/applications/schemas/application.schema';
 import { RecommendationCacheService } from '../recommendation-cache.service';
 import { StudentContextCacheService } from '../student-context-cache.service';
-import { ImpressionService } from './impression.service';
-import { MLScorerService } from './ml-scorer.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -26,8 +24,6 @@ export class RecommendationService implements OnApplicationBootstrap {
     private readonly userEventService: UserEventService,
     private readonly recommendationCacheService: RecommendationCacheService,
     private readonly studentContextCacheService: StudentContextCacheService,
-    private readonly impressionService: ImpressionService,
-    private readonly mlScorerService: MLScorerService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -127,7 +123,7 @@ export class RecommendationService implements OnApplicationBootstrap {
       const cachedTrending = await this.recommendationCacheService.getTrending(dto.type);
       if (cachedTrending) {
         this.logger.log(`[Cache HIT] Returning cached trending ${dto.type} recommendations`);
-        return await this.paginateAndLogImpression(cachedTrending, page, limit, isAdmin, userId, isProgram);
+        return await this.paginateAndLogImpression(cachedTrending, page, limit, isAdmin);
       }
 
       this.logger.log(`[Cache MISS] Computing trending ${dto.type} recommendations`);
@@ -141,14 +137,14 @@ export class RecommendationService implements OnApplicationBootstrap {
       }
 
       await this.recommendationCacheService.setTrending(dto.type, trendingRecs);
-      return await this.paginateAndLogImpression(trendingRecs, page, limit, isAdmin, userId, isProgram);
+      return await this.paginateAndLogImpression(trendingRecs, page, limit, isAdmin);
     }
 
     // B. Logged in User Cache
     const cachedRecs = await this.recommendationCacheService.get(String(userId), dto.type);
     if (cachedRecs) {
       this.logger.log(`[Cache HIT] Returning cached ${dto.type} recommendations for student ${userId}`);
-      return await this.paginateAndLogImpression(cachedRecs, page, limit, isAdmin, userId, isProgram);
+      return await this.paginateAndLogImpression(cachedRecs, page, limit, isAdmin);
     }
 
     // Cache MISS: compute
@@ -175,49 +171,25 @@ export class RecommendationService implements OnApplicationBootstrap {
     // Cache the complete scored list for the user
     await this.recommendationCacheService.set(String(userId), dto.type, recommendations);
 
-    return await this.paginateAndLogImpression(recommendations, page, limit, isAdmin, userId, isProgram);
+    return await this.paginateAndLogImpression(recommendations, page, limit, isAdmin);
   }
 
   /**
-   * Helper to format, paginate, log impression, and return payload.
+   * Helper to format, paginate, and return payload.
    */
-  private async paginateAndLogImpression(recommendations: any[], page: number, limit: number, isAdmin: boolean, userId: string | null, isProgram: boolean) {
-    let finalRanked = recommendations;
-    let engine = 'rules';
-
-    if (isProgram && userId) {
-      const featureSnapshots = {};
-      for (const rec of recommendations) {
-        if (rec.features) {
-          featureSnapshots[rec._id.toString()] = rec.features;
-        }
-      }
-      const mlResult = await this.mlScorerService.getRanked(userId, recommendations, featureSnapshots);
-      finalRanked = mlResult.ranked;
-      engine = mlResult.engine;
-    }
-
-    const total = finalRanked.length;
+  private async paginateAndLogImpression(recommendations: any[], page: number, limit: number, isAdmin: boolean) {
+    const total = recommendations.length;
     const startIndex = (page - 1) * limit;
-    const slicedData = finalRanked.slice(startIndex, startIndex + limit);
+    const slicedData = recommendations.slice(startIndex, startIndex + limit);
 
     const sessionId = crypto.randomUUID();
-
-    if (isProgram && userId) {
-      this.impressionService.logImpression(
-        String(userId),
-        sessionId,
-        slicedData,
-        engine as 'rules' | 'ml'
-      ).catch(err => this.logger.warn(`Impression logging failed: ${err.message}`));
-    }
 
     const formattedData = slicedData.map((item) => {
       const copy = { ...item };
       if (!isAdmin) {
         delete copy.relevance_score;
       }
-      delete copy.features; // Do not leak ML features to the frontend
+      delete copy.features; // Do not leak features to the frontend
       return copy;
     });
 
@@ -228,10 +200,8 @@ export class RecommendationService implements OnApplicationBootstrap {
         page,
         limit,
         session_id: sessionId,
-        engine: engine,
+        engine: 'rules',
       },
     };
   }
-
-
 }
