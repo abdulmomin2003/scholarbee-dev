@@ -1,0 +1,1026 @@
+You are working on ScholarBee, a Pakistani university discovery platform.
+Stack: NestJS + MongoDB/Mongoose + Redis (backend), React/Next.js (frontend).
+An existing rules-based recommendation engine is in place with behavioral
+event tracking, onboarding profiles, Bayesian weight learning, and Redis
+caching.
+
+Your job in this session is to build the complete ML infrastructure base —
+impression logging, Python ML microservice, NestJS integration, and an
+admin dashboard — so that:
+
+  1. The system is demonstrable to a client as ML-powered TODAY
+  2. The model genuinely improves as real data accumulates over time
+  3. Nothing breaks the existing recommendation system at any point
+
+The model will bootstrap on whatever data exists, including synthetic
+warm-up data if real impressions are insufficient. It will produce real
+scores via a real ML pipeline, not mocks. The client sees a working
+ML system. The architecture handles production scale when the time comes.
+
+Work phase by phase. After each phase, print a structured summary and STOP.
+Do not proceed until the human says "proceed."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 1 — IMPRESSION LOGGING (NestJS)
+Priority: Highest | This is the data pipeline that feeds the model
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Every time a recommendation list is served to a student, log what
+was shown and at what position. When the student acts (or doesn't), label
+that impression. These labeled impressions become training data.
+
+── Task 1: Impression Schema ──────────────────────────────────
+File: src/recommendation/schemas/impression.schema.ts
+
+Fields:
+  student_id:          ObjectId (ref: User)
+  program_id:          ObjectId (ref: AdmissionProgram)
+  session_id:          string   (UUID, one per recommendation request)
+  position:            number   (0-indexed rank position shown to student)
+  scoring_engine:      string   ('rules' | 'ml', which engine ranked this)
+  label:               number   (null=unresolved, 1=engaged, 0=ignored)
+  was_clicked:         boolean  (default: false)
+  was_favorited:       boolean  (default: false)
+  was_applied:         boolean  (default: false)
+  was_ignored:         boolean  (default: false)
+  shown_at:            Date
+  acted_at:            Date     (nullable)
+  session_closed_at:   Date     (nullable)
+
+  -- Feature snapshot at impression time --
+  features: {
+    degree_match:          number   (0 or 1)
+    field_similarity:      number   (0.0–1.0, from knowledge graph)
+    city_match:            number   (0 or 1)
+    fee_match:             number   (0.0–1.0)
+    is_partner:            boolean
+    has_active_deadline:   boolean
+    program_popularity:    number   (0.0–1.0, normalized)
+    student_city_weight:   number   (from Bayesian weights)
+    student_field_weight:  number   (from Bayesian weights)
+    student_degree_weight: number   (from Bayesian weights)
+    student_fee_weight:    number   (from Bayesian weights)
+    prior_clicks_on_field: number
+    prior_clicks_on_city:  number
+    position_in_list:      number
+  }
+
+Indexes:
+  { student_id: 1, shown_at: -1 }
+  { session_id: 1 }
+  { label: 1, shown_at: -1 }
+  { scoring_engine: 1, shown_at: -1 }
+
+── Task 2: ImpressionService ──────────────────────────────────
+File: src/recommendation/impression.service.ts
+
+Methods:
+
+  async logImpression(
+    studentId: string,
+    sessionId: string,
+    scoredPrograms: ScoredProgram[],
+    featureSnapshots: Record<string, ProgramFeatures>,
+    scoringEngine: 'rules' | 'ml'
+  ): Promise<void>
+    - Creates one Impression document per program in the list
+    - Sets position from array index
+    - Stores feature snapshot at this exact moment
+    - label = null (unresolved until acted on or session closes)
+    - Fire and forget at call site — this method must not throw
+
+  async recordAction(
+    studentId: string,
+    programId: string,
+    action: 'click' | 'favorite' | 'apply'
+  ): Promise<void>
+    - Finds most recent unresolved impression for student+program
+    - Sets appropriate flag, acted_at = now, label = 1
+    - If no impression found: create one retroactively with label=1
+      (handles edge case where impression logging missed a session)
+
+  async closeExpiredSessions(): Promise<void>
+    - Finds all impressions where label IS NULL and
+      shown_at < (now minus 30 minutes)
+    - Sets was_ignored=true, label=0, session_closed_at=now
+    - Runs as cron job every 10 minutes
+
+  async getDataStatus(): Promise<DataStatusResult>
+    Returns:
+      total_impressions, labeled_impressions,
+      positive_labels, negative_labels,
+      positive_rate, unique_students, unique_programs,
+      oldest_impression, newest_impression,
+      ml_ready: boolean
+    ml_ready = true when:
+      labeled_impressions >= 500   ← lowered from 1000 for faster bootstrap
+      positive_rate between 0.03 and 0.60
+      unique_students >= 20        ← lowered for faster bootstrap
+      unique_programs >= 10
+
+── Task 3: Wire into recommendation pipeline ──────────────────
+In the existing recommendation service, after computing scored results:
+  a. Generate a UUID session_id (use crypto.randomUUID())
+  b. Extract feature snapshots from the scoring engine output
+     (the scoring engine already computes these per program —
+      expose them as part of ScoredProgram or a parallel map)
+  c. Call impressionService.logImpression() — do NOT await
+  d. Include session_id in the API response payload
+
+In the existing behavioral event service, when any event is saved:
+  Call impressionService.recordAction() — do NOT await
+
+── Task 4: Register cron job ──────────────────────────────────
+Use @nestjs/schedule. Every 10 minutes:
+  Call impressionService.closeExpiredSessions()
+  Log: sessions closed, impressions labeled as ignored
+
+── Task 5: Data status endpoint ───────────────────────────────
+GET /api/admin/ml/data-status (admin auth required)
+Returns the DataStatusResult from getDataStatus()
+This endpoint is polled by the admin dashboard in Phase 4.
+
+── Task 6: Synthetic warm-up data generator ───────────────────
+File: src/recommendation/scripts/generate-warmup-impressions.ts
+
+Purpose: Bootstrap the ML model immediately by generating realistic
+synthetic impressions from existing behavioral events + onboarding data.
+This is NOT fake data — it is derived from real student behavior already
+in the database, reformatted as labeled impressions.
+
+Logic:
+  1. Load all existing behavioral events (clicks, favorites, applies)
+  2. For each event, find the corresponding program
+  3. Extract its feature scores against the student's profile
+  4. Create an Impression document with:
+       label = 1 (the student did engage with this program)
+       was_clicked/favorited/applied = true (from event type)
+       session_id = 'warmup_' + event._id
+       scoring_engine = 'rules'
+       features = computed from existing scoring engine
+  5. For each positive impression, generate 3–5 negative impressions
+     (programs the student did NOT engage with, from same field/city pool)
+     with label = 0
+     This creates a realistic 1:4 positive:negative ratio
+
+Run as: npx ts-node src/recommendation/scripts/generate-warmup-impressions.ts
+Add a guard: skip if labeled_impressions already > 100 (don't double-generate)
+Log: how many positive and negative impressions were created
+
+PHASE 1 COMPLETION CRITERIA:
+  - Impression schema created with all fields and indexes
+  - ImpressionService implemented with all 4 methods
+  - Recommendation pipeline logs impressions non-blocking
+  - Behavioral events update impression labels
+  - Cron job closes expired sessions every 10 minutes
+  - /api/admin/ml/data-status returns accurate counts
+  - Warm-up script exists and is runnable
+  - Print Phase 1 summary and STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 2 — PYTHON ML MICROSERVICE
+Priority: Highest | This is the model itself
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: A fully working Python FastAPI service that trains a real ML model
+on available data (including warm-up data), serves real scores, and
+degrades gracefully when data is thin. The client can see this running.
+
+── Directory structure ────────────────────────────────────────
+
+ml-service/
+├── main.py
+├── requirements.txt
+├── Dockerfile
+├── .env.example
+├── config.py
+├── database/
+│   ├── __init__.py
+│   └── mongo.py
+├── features/
+│   ├── __init__.py
+│   └── extractor.py
+├── training/
+│   ├── __init__.py
+│   ├── dataset.py
+│   ├── trainer.py
+│   └── evaluator.py
+├── serving/
+│   ├── __init__.py
+│   └── scorer.py
+├── models/
+│   └── .gitkeep        ← gitignore everything else in this folder
+└── tests/
+    ├── test_extractor.py
+    ├── test_trainer.py
+    └── test_scorer.py
+
+── Task 1: requirements.txt ───────────────────────────────────
+
+fastapi==0.111.0
+uvicorn==0.29.0
+motor==3.4.0
+pymongo==4.7.2
+scikit-learn==1.4.2
+numpy==1.26.4
+pandas==2.2.2
+joblib==1.4.2
+pydantic==2.7.1
+pydantic-settings==2.2.1
+python-dotenv==1.0.1
+apscheduler==3.10.4
+
+── Task 2: config.py ──────────────────────────────────────────
+
+Pydantic Settings class loading from environment:
+  MONGODB_URI:            str
+  MONGODB_DB_NAME:        str = "scholarbee"
+  MODEL_PATH:             str = "./models/recommendation_model.joblib"
+  METADATA_PATH:          str = "./models/model_metadata.json"
+  MIN_TRAINING_SAMPLES:   int = 200   ← low threshold for bootstrap
+  MIN_POSITIVE_RATE:      float = 0.03
+  HOST:                   str = "0.0.0.0"
+  PORT:                   int = 8002
+
+── Task 3: database/mongo.py ──────────────────────────────────
+
+Async Motor client. Expose:
+  get_database() → AsyncIOMotorDatabase
+  Collections: impressions, admission_programs, users
+  Initialize on app startup, close on shutdown.
+
+── Task 4: features/extractor.py ──────────────────────────────
+
+FEATURE_COLUMNS = [
+  'degree_match', 'field_similarity', 'city_match', 'fee_match',
+  'is_partner', 'has_active_deadline', 'program_popularity',
+  'student_city_weight', 'student_field_weight',
+  'student_degree_weight', 'student_fee_weight',
+  'prior_clicks_on_field', 'prior_clicks_on_city', 'position_in_list'
+]
+-- This order is a permanent contract. Never reorder after first training. --
+
+Class FeatureExtractor:
+
+  def impression_to_vector(impression: dict) -> np.ndarray
+    - Pull each feature from impression['features']
+    - Return 1D numpy array in FEATURE_COLUMNS order
+    - Replace None/missing values with 0.0 (not an error — warm-up data
+      may have gaps, model handles it via regularization)
+    - Cast booleans to float (True→1.0, False→0.0)
+
+  def impressions_to_matrix(
+    impressions: list[dict]
+  ) -> tuple[np.ndarray, np.ndarray]
+    - Returns (X, y): X shape (n, 14), y shape (n,)
+    - Filters out any rows where label is None
+    - Raises DatasetError if result has 0 rows
+
+  def build_scoring_vector(features: dict) -> np.ndarray
+    - Same as impression_to_vector but for live scoring (no label field)
+    - Used by the /score endpoint
+
+  def validate(X: np.ndarray, y: np.ndarray) -> ValidationReport
+    - n_samples, n_features, positive_rate, has_variance per feature
+    - Returns ValidationReport dataclass
+
+── Task 5: training/dataset.py ────────────────────────────────
+
+Class DatasetLoader:
+
+  async def load(db, config) -> DatasetResult:
+
+    1. Query MongoDB impressions collection:
+         { label: { $in: [0, 1] } }
+       Project: features, label, student_id, program_id, shown_at
+
+    2. Build feature matrix via FeatureExtractor
+
+    3. Validation (soft — log warnings, do not raise unless critical):
+         - If n_samples < config.MIN_TRAINING_SAMPLES:
+             log WARNING with count and threshold
+             proceed anyway (bootstrap mode)
+         - If positive_rate < config.MIN_POSITIVE_RATE:
+             log WARNING
+             proceed anyway
+         - If n_samples < 50: raise DatasetError (truly too little)
+
+    4. Stratified train/test split (test_size=0.2, stratify=y)
+       If n_samples < 100: use test_size=0.1 to preserve training data
+
+    5. Return DatasetResult:
+         X_train, X_test, y_train, y_test,
+         n_samples, positive_rate, n_students, n_programs,
+         feature_columns = FEATURE_COLUMNS,
+         bootstrap_mode: bool  (true if n_samples < MIN_TRAINING_SAMPLES)
+
+── Task 6: training/trainer.py ────────────────────────────────
+
+Class ModelTrainer:
+
+  async def train(db, config) -> TrainingResult:
+
+    1. Load dataset via DatasetLoader.load()
+       If DatasetError: raise — not enough data even for bootstrap
+
+    2. Select model based on dataset size:
+
+       If n_samples < 500 (bootstrap mode):
+         Use LogisticRegression only, no grid search:
+           LogisticRegression(C=1.0, max_iter=500,
+                              class_weight='balanced',
+                              random_state=42, solver='liblinear')
+         Wrap in StandardScaler pipeline
+         Fit directly on X_train
+
+       If n_samples >= 500:
+         GridSearchCV over LogisticRegression:
+           param_grid = {
+             'classifier__C': [0.01, 0.1, 1.0, 10.0],
+             'classifier__penalty': ['l1', 'l2'],
+             'classifier__solver': ['liblinear']
+           }
+           cv=5, scoring='roc_auc', n_jobs=-1
+
+    3. Evaluate via ModelEvaluator.evaluate()
+
+    4. Quality gate:
+       Bootstrap mode (n_samples < 500):
+         Accept if AUC-ROC >= 0.50 (better than random)
+         Log clearly: "Bootstrap model trained — improves as data grows"
+
+       Production mode (n_samples >= 500):
+         Accept if AUC-ROC >= 0.60
+         Reject below 0.60 — keep old model if one exists
+
+    5. Save model:
+         joblib.dump(pipeline, config.MODEL_PATH)
+         version = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+         Save metadata JSON:
+           version, trained_at, n_samples, positive_rate,
+           auc_roc, precision_at_10, bootstrap_mode,
+           feature_columns, best_params (if grid search ran)
+
+    6. Reload scorer (hot reload)
+
+    7. Return TrainingResult with all of the above
+
+── Task 7: training/evaluator.py ──────────────────────────────
+
+Class ModelEvaluator:
+
+  def evaluate(model, X_test, y_test) -> EvaluationMetrics:
+    Compute:
+      auc_roc:           sklearn roc_auc_score
+                         If only one class in y_test (small dataset):
+                           set auc_roc = 0.5, log warning
+      precision_at_10:   among predictions ranked top-10 by probability,
+                         fraction that are actually positive
+                         If test set has < 10 samples: use all samples
+      recall_at_10:      fraction of positives captured in top-10
+      feature_importance: dict of feature → abs(coefficient)
+                          from pipeline['classifier'].coef_[0]
+      class_distribution: { positive: int, negative: int }
+
+    Return EvaluationMetrics dataclass
+
+── Task 8: serving/scorer.py ──────────────────────────────────
+
+Class MLScorer:
+
+  def __init__(self, model_path, metadata_path):
+    self.model = None
+    self.metadata = {}
+    self.load()
+
+  def load(self) -> bool:
+    Try to load model and metadata from disk.
+    Return True on success, False if files don't exist.
+    Set self.model = None if loading fails.
+    Log version on success: "ML model loaded: version {v}, AUC-ROC {auc}"
+
+  def is_ready(self) -> bool:
+    return self.model is not None
+
+  def score(self, candidates: list[dict]) -> list[ScoredCandidate]:
+    -- candidates: list of { program_id: str, features: dict }
+    -- Build feature matrix from candidates using FeatureExtractor
+    -- model.predict_proba(X)[:,1] → probability of engagement
+    -- Return list of { program_id, ml_score: float }
+       sorted by ml_score descending
+    -- Raise ModelNotReadyError if model is None
+
+  def get_status(self) -> dict:
+    Return:
+      is_ready, model_version, trained_at, n_training_samples,
+      auc_roc, bootstrap_mode, feature_columns
+
+── Task 9: main.py (FastAPI app) ──────────────────────────────
+
+Global state:
+  scorer = MLScorer(config.MODEL_PATH, config.METADATA_PATH)
+  is_training = False
+  last_training_error: str | None = None
+  training_lock = asyncio.Lock()
+
+Startup event:
+  - Connect to MongoDB
+  - scorer.load() — model may not exist yet, that's fine
+  - Schedule weekly retraining job (APScheduler, every 7 days)
+  - Log startup status clearly
+
+Shutdown event:
+  - Close MongoDB connection
+  - Shutdown APScheduler
+
+Endpoints:
+
+  GET /health
+    Always returns 200. Never fails.
+    {
+      status: "ok",
+      model_loaded: bool,
+      model_version: str | null,
+      bootstrap_mode: bool | null,
+      auc_roc: float | null,
+      n_training_samples: int | null,
+      is_training: bool,
+      last_training_error: str | null
+    }
+
+  POST /score
+    Request:
+      {
+        student_id: str,
+        candidates: [
+          { program_id: str, features: { ...14 feature fields... } }
+        ]
+      }
+    Response (model loaded):
+      {
+        student_id: str,
+        scored_candidates: [{ program_id, ml_score }],
+        model_version: str,
+        bootstrap_mode: bool,
+        scored_at: ISO datetime
+      }
+    Response (model not loaded):
+      HTTP 503:
+      {
+        error: "model_not_ready",
+        message: "No trained model available. Trigger POST /train first.",
+        suggestion: "Run the warm-up data generator then POST /train"
+      }
+
+  POST /train
+    Triggers training as a FastAPI BackgroundTask.
+    Body: { force: bool = false }
+    If already training: HTTP 409 { error: "already_training" }
+    If force=false and insufficient data:
+      Check data status from MongoDB
+      If truly insufficient (< 50 labeled impressions):
+        HTTP 400 with data status details and suggestion to run warm-up script
+      Otherwise: proceed (bootstrap mode, log warning)
+    Response: { status: "training_started", message: str }
+
+    Background task:
+      Set is_training = True
+      Try:
+        result = await ModelTrainer().train(db, config)
+        scorer.load()
+        last_training_error = None
+        Log success with metrics
+      Except:
+        last_training_error = str(exception)
+        Log error
+      Finally:
+        Set is_training = False
+
+  GET /train/status
+    {
+      is_training: bool,
+      last_trained_at: str | null,
+      last_auc_roc: float | null,
+      bootstrap_mode: bool | null,
+      n_training_samples: int | null,
+      model_version: str | null,
+      last_error: str | null
+    }
+
+  GET /data/status
+    Reads directly from MongoDB impressions collection.
+    Returns same structure as NestJS /api/admin/ml/data-status.
+    Including ml_ready flag.
+    This lets the admin dashboard poll a single service.
+
+── Task 10: Dockerfile ────────────────────────────────────────
+
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN mkdir -p models
+EXPOSE 8002
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]
+
+── Task 11: Add ml-service to docker-compose.yml ──────────────
+
+ml-service:
+  build: ./ml-service
+  ports: ["8002:8002"]
+  environment:
+    - MONGODB_URI=${MONGODB_URI}
+    - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+  volumes:
+    - ml_models:/app/models
+  depends_on: [mongo, redis]  ← adjust names to match your compose file
+  restart: unless-stopped
+
+Add named volume: ml_models
+
+── Task 12: Tests ─────────────────────────────────────────────
+
+tests/test_extractor.py:
+  - impression_to_vector returns shape (14,)
+  - Missing features default to 0.0 (no exception)
+  - Booleans cast correctly to float
+  - impressions_to_matrix filters null labels
+
+tests/test_trainer.py:
+  - Trainer runs on 60 synthetic samples without crashing
+  - Bootstrap mode selected when n_samples < 500
+  - Quality gate accepts AUC >= 0.50 in bootstrap mode
+
+tests/test_scorer.py:
+  - scorer.is_ready() returns False when no model file exists
+  - scorer.score() raises ModelNotReadyError when not ready
+  - After loading a trained model, score() returns correct shape
+
+PHASE 2 COMPLETION CRITERIA:
+  - Full ml-service directory created with all files
+  - FastAPI starts, /health returns 200 always
+  - /score returns 503 clearly when no model loaded (correct)
+  - /train endpoint triggers real training pipeline
+  - Docker Compose includes ml-service with persistent volume
+  - All tests pass
+  - Print Phase 2 summary and STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 3 — NESTJS ↔ ML SERVICE INTEGRATION
+Priority: High | The rules engine and ML model work side by side
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Connect NestJS to the ML microservice. Run ML in shadow mode
+initially (scores computed but not used for ranking). When the model
+is ready, a simple env flag switches it live. The rules engine is
+always the fallback.
+
+── Task 1: MLScorerService (NestJS) ───────────────────────────
+File: src/recommendation/ml-scorer.service.ts
+
+Config from environment:
+  ML_SERVICE_URL:      string  (default: "http://ml-service:8002")
+  ML_ENABLED:          boolean (default: false)
+  ML_SHADOW_MODE:      boolean (default: true)
+  ML_TIMEOUT_MS:       number  (default: 500)
+  ML_ROLLOUT_PCT:      number  (default: 0, range 0-100)
+
+Methods:
+
+  async getHealth(): Promise<MLHealthStatus>
+    GET {ML_SERVICE_URL}/health
+    Returns health payload or { status: 'unreachable' } on error
+    Never throws.
+
+  async isReady(): Promise<boolean>
+    Calls getHealth(), returns model_loaded boolean
+    Returns false on any error.
+
+  async score(
+    studentId: string,
+    candidates: ScoredProgram[],
+    featureSnapshots: Record<string, ProgramFeatures>
+  ): Promise<MLScoreResult[] | null>
+    - Build /score request payload from candidates + snapshots
+    - POST to ML service with ML_TIMEOUT_MS timeout
+    - Returns null on: error, timeout, 503 (model not ready)
+    - Returns MLScoreResult[] on success
+    - Logs warn on failure, never throws
+
+  async scoreInShadow(
+    studentId: string,
+    rulesRanked: ScoredProgram[],
+    featureSnapshots: Record<string, ProgramFeatures>
+  ): Promise<void>
+    - Calls score()
+    - If null: log "ML unavailable, shadow skipped"
+    - If scores received:
+        a. Build ML-ranked order
+        b. Compute Spearman rank correlation (implement in ~10 lines)
+        c. Save ShadowComparison to MongoDB (Task 2)
+        d. Log: { student_id, correlation, ml_top3, rules_top3 }
+    - Always fire-and-forget — never awaited by caller
+
+  isEligibleForML(studentId: string): boolean
+    - Hash studentId deterministically to 0-99 bucket
+      parseInt(sha256(studentId).slice(0,8), 16) % 100
+    - Return bucket < ML_ROLLOUT_PCT
+    - Same student always gets same bucket (not random per request)
+
+  async getRanked(
+    studentId: string,
+    rulesRanked: ScoredProgram[],
+    featureSnapshots: Record<string, ProgramFeatures>
+  ): Promise<{ ranked: ScoredProgram[], engine: 'rules' | 'ml' }>
+    - If ML_ENABLED=false OR ML_SHADOW_MODE=true:
+        fire scoreInShadow() without await
+        return { ranked: rulesRanked, engine: 'rules' }
+    - If ML_ENABLED=true AND ML_SHADOW_MODE=false:
+        if NOT isEligibleForML(studentId):
+          return { ranked: rulesRanked, engine: 'rules' }
+        mlScores = await score(...)
+        if mlScores is null:
+          return { ranked: rulesRanked, engine: 'rules' }  ← fallback
+        sort candidates by ml_score
+        apply partner/freshness boosts as tiebreakers
+        return { ranked: mlRanked, engine: 'ml' }
+
+── Task 2: ShadowComparison schema ────────────────────────────
+File: src/recommendation/schemas/ml-shadow-comparison.schema.ts
+
+Fields:
+  student_id:         ObjectId
+  rules_top5:         string[]
+  ml_top5:            string[]
+  rank_correlation:   number
+  rules_scores:       number[]
+  ml_scores:          number[]
+  recorded_at:        Date
+
+Index: { recorded_at: -1 }
+
+── Task 3: Wire into recommendation service ───────────────────
+In the recommendation service, after scoring:
+  const { ranked, engine } = await mlScorerService.getRanked(
+    studentId, rulesRanked, featureSnapshots
+  );
+  -- Pass engine to impression logger as scoring_engine field
+  -- Return ranked to the student
+
+── Task 4: Add env variables ──────────────────────────────────
+Add to .env.example:
+  ML_SERVICE_URL=http://ml-service:8002
+  ML_ENABLED=false
+  ML_SHADOW_MODE=true
+  ML_TIMEOUT_MS=500
+  ML_ROLLOUT_PCT=0
+
+PHASE 3 COMPLETION CRITERIA:
+  - MLScorerService created and injectable
+  - Shadow mode fires without blocking any request
+  - getRanked() always returns rules result when ML_ENABLED=false
+  - ML errors always fall back to rules silently
+  - ShadowComparison documents saved to MongoDB
+  - Print Phase 3 summary and STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 4 — ADMIN DASHBOARD (React/Next.js)
+Priority: High | This is what the client SEES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: A polished, real-time admin dashboard that shows the ML system
+status, training controls, data readiness, and live metrics. This is
+the client-facing proof that the system is ML-powered.
+
+── Task 1: Supporting NestJS endpoints ────────────────────────
+Add to an admin controller (create one if absent):
+
+  GET /api/admin/ml/status
+    Aggregates from multiple sources and returns:
+    {
+      data: {
+        total_impressions: number,
+        labeled_impressions: number,
+        positive_labels: number,
+        negative_labels: number,
+        positive_rate: number,
+        unique_students: number,
+        unique_programs: number,
+        ml_ready: boolean
+      },
+      model: {           ← fetched from ML service /health
+        loaded: boolean,
+        version: string | null,
+        auc_roc: number | null,
+        n_training_samples: number | null,
+        bootstrap_mode: boolean | null,
+        trained_at: string | null
+      },
+      service: {
+        ml_service_reachable: boolean,
+        is_training: boolean,
+        last_error: string | null
+      },
+      config: {
+        ml_enabled: boolean,
+        shadow_mode: boolean,
+        rollout_pct: number
+      }
+    }
+    -- Fetch ML service /health with 2s timeout
+    -- If unreachable: model = null, service.ml_service_reachable = false
+    -- Never fails — always returns 200 with whatever is available
+
+  POST /api/admin/ml/train
+    Admin only. Proxies to ML service POST /train.
+    Body: { force: boolean }
+    Returns ML service response directly.
+
+  GET /api/admin/ml/shadow-stats
+    From ml_shadow_comparisons collection:
+    {
+      total_comparisons: number,
+      avg_rank_correlation: number,
+      recent_comparisons: [
+        { student_id, correlation, ml_top3, rules_top3, recorded_at }
+      ]  ← last 20
+      correlation_trend: [
+        { date: string, avg: number, count: number }
+      ]  ← grouped by day, last 14 days
+    }
+
+  PATCH /api/admin/ml/config
+    Admin only. Update ML config at runtime:
+    Body: { ml_enabled?: boolean, shadow_mode?: boolean, rollout_pct?: number }
+    Store values in Redis (key: ml:config:{field})
+    MLScorerService reads from Redis first, falls back to env vars.
+    Returns updated config.
+
+── Task 2: Dashboard page ─────────────────────────────────────
+File: app/admin/ml-dashboard/page.tsx
+  (or pages/admin/ml-dashboard.tsx depending on your Next.js version)
+
+This is a single page with 4 clear sections. Use your existing UI
+component library (Tailwind, shadcn, whatever is already in the project).
+Do not install new UI libraries. Build with what exists.
+
+Section A — System Status Bar (top of page)
+  Three status pills in a row:
+    🟢/🔴 ML Service:    "Online" or "Unreachable"
+    🟢/🟡/🔴 Model:      "Loaded (v{version})" | "Training..." | "Not Trained"
+    🟢/🟡 Mode:          "Live ({rollout_pct}% of users)" | "Shadow Mode" | "Disabled"
+  Auto-refreshes every 30 seconds via polling GET /api/admin/ml/status
+
+Section B — Data Readiness Card
+  Title: "Training Data"
+  Show as a progress-style display:
+    Labeled Impressions:  {n} / 500  [progress bar]
+    Unique Students:      {n} / 20   [progress bar]
+    Positive Rate:        {n}%       [indicator, green if 3-60%, red otherwise]
+    ML Ready:             ✅ Yes / ⏳ Not yet (with reason)
+  Below the card:
+    If NOT ml_ready:
+      Amber info box: "Run the warm-up script to bootstrap training data
+      from existing behavioral events. Command:
+      npx ts-node src/recommendation/scripts/generate-warmup-impressions.ts"
+    If ml_ready AND model not loaded:
+      Blue info box: "Data is ready. Train the model below."
+
+Section C — Model Status Card
+  If model not loaded:
+    Show placeholder state:
+      "No model trained yet"
+      Button: "Train Model Now" → POST /api/admin/ml/train { force: false }
+      If training in progress: show spinner + "Training in progress..."
+
+  If model loaded:
+    Show model metrics in a clean grid:
+      Version:          {version}
+      Trained:          {trained_at} (relative time, e.g. "2 hours ago")
+      Training samples: {n}
+      AUC-ROC:          {value} with color (green ≥0.65, amber 0.50-0.65, red <0.50)
+      Mode:             "Bootstrap" (amber badge) or "Production" (green badge)
+    Feature importance bar chart (horizontal bars):
+      Show top 8 features by importance (abs coefficient value)
+      Label each bar with the feature name and value
+      This is the most impressive visual for the client
+    Button: "Retrain Model" → POST /api/admin/ml/train { force: true }
+      Confirm dialog: "This will retrain on all available data. Continue?"
+
+Section D — Shadow Mode Analytics
+  Only visible when at least 10 shadow comparisons exist.
+  Title: "ML vs Rules Engine Comparison"
+  Show:
+    Total comparisons logged: {n}
+    Average rank correlation:  {value}
+      With interpretation text:
+        > 0.85: "Models largely agree — ML is learning similar patterns"
+        0.65-0.85: "Some divergence — ML has found different signals"
+        < 0.65: "Significant divergence — review shadow comparisons"
+    Simple table: last 10 shadow comparisons
+      Columns: Student ID (masked, show last 4 chars), Correlation,
+               Rules Top 3 (program names), ML Top 3 (program names),
+               Time
+  If fewer than 10 comparisons:
+    Show: "Collecting shadow data... ({n}/10 comparisons logged)"
+
+Section E — Configuration Panel (collapsible, bottom of page)
+  Title: "ML Configuration"
+  Toggle: ML Enabled (boolean) → PATCH /api/admin/ml/config
+  Toggle: Shadow Mode (boolean) → PATCH /api/admin/ml/config
+  Slider: Rollout % (0-100, step 10) → PATCH /api/admin/ml/config
+  Warning box (shown when ML Enabled + Shadow Mode OFF + Rollout > 0):
+    "⚠️ ML model is serving live results to {rollout_pct}% of users."
+  Save button → sends all three values in one PATCH request
+
+── Task 3: Navigation ─────────────────────────────────────────
+Add "ML Dashboard" link to the existing admin navigation/sidebar.
+Use a brain or chart icon. Only visible to admin role users.
+
+── Task 4: Data fetching ──────────────────────────────────────
+Use whatever data fetching pattern is already in the project
+(SWR, React Query, or plain fetch with useEffect).
+  - /api/admin/ml/status: poll every 30 seconds
+  - /api/admin/ml/shadow-stats: fetch on mount, refresh on demand
+  - Show loading skeletons while fetching (not spinners)
+  - Show error state if /status fetch fails (service unreachable)
+
+PHASE 4 COMPLETION CRITERIA:
+  - All 4 NestJS admin endpoints implemented
+  - Dashboard page exists at /admin/ml-dashboard
+  - All 5 sections render correctly
+  - Status bar auto-refreshes every 30 seconds
+  - Train button works and shows training progress
+  - Feature importance chart displays after training
+  - Config panel updates ML behavior at runtime
+  - Print Phase 4 summary and STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 5 — FIRST TRAINING RUN & VALIDATION
+Priority: High | Prove the whole system works end to end
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Goal: Run the complete pipeline from data generation to trained model
+to live scores, and verify every component works together.
+
+── Task 1: Run warm-up data generator ─────────────────────────
+Execute:
+  npx ts-node src/recommendation/scripts/generate-warmup-impressions.ts
+
+Verify output:
+  - Reports how many positive and negative impressions were created
+  - No errors
+  - MongoDB impressions collection has documents with label 0 and 1
+
+── Task 2: Verify data status ─────────────────────────────────
+Call GET /api/admin/ml/data-status
+Verify:
+  - labeled_impressions > 0
+  - both positive and negative labels exist
+  - positive_rate is between 0.03 and 0.60
+Log the full response for the human to review.
+
+── Task 3: Trigger training ───────────────────────────────────
+POST /api/admin/ml/train { force: true }
+  (force: true bypasses the ml_ready gate for bootstrap training)
+
+Monitor via GET /api/admin/ml/status every 5 seconds until
+is_training = false.
+
+Log the final training result:
+  - model version
+  - AUC-ROC
+  - n_training_samples
+  - bootstrap_mode
+  - best_params (if grid search ran)
+  - feature_importance (top 5 features)
+
+── Task 4: Verify scoring works ───────────────────────────────
+After model is loaded, call POST /score on the ML service directly
+with a sample payload (build from one real student + 5 real programs).
+Verify:
+  - Response contains ml_score for each candidate
+  - Scores are between 0.0 and 1.0
+  - No errors
+
+── Task 5: Verify shadow mode ─────────────────────────────────
+Ensure ML_SHADOW_MODE=true and ML_ENABLED=true in .env
+Make one recommendation request as a logged-in student.
+Verify:
+  - Response returns normally (rules-ranked result)
+  - One ShadowComparison document appears in MongoDB
+  - GET /api/admin/ml/shadow-stats shows 1 comparison
+
+── Task 6: Verify dashboard ───────────────────────────────────
+Open /admin/ml-dashboard in the browser.
+Verify all sections render with real data:
+  - Status bar shows model as "Loaded"
+  - Data readiness shows real impression counts
+  - Model card shows version, AUC-ROC, feature importance chart
+  - Shadow stats section shows the comparison from Task 5
+
+Report any visual issues or data mismatches.
+
+PHASE 5 COMPLETION CRITERIA:
+  - Warm-up data generated successfully
+  - Model trained and loaded
+  - /score returns real ML scores
+  - Shadow comparison logged for a real request
+  - Dashboard displays real data for all sections
+  - Print final end-to-end validation report and STOP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GLOBAL RULES — FOLLOW THROUGHOUT ALL PHASES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Safety — Non-negotiable:
+  - Rules engine is NEVER removed. Always the fallback.
+  - ML errors NEVER reach the student. Catch everything in MLScorerService.
+  - ML_ENABLED defaults to false. Safe by default.
+  - Shadow mode never adds latency to any response. Always fire-and-forget.
+  - The /health endpoint always returns 200, even if model is not loaded.
+
+Data Integrity:
+  - Features are snapshotted at impression time. Never recomputed later.
+  - FEATURE_COLUMNS order is permanent after first training.
+  - Warm-up data is clearly flagged (session_id prefix 'warmup_').
+
+Code Quality — NestJS:
+  - All new services are injectable NestJS providers.
+  - No ML logic inside the scoring engine.
+  - No console.log — use NestJS Logger with context strings.
+  - TypeScript strict mode — no untyped `any` without comment.
+  - All async calls that should not block must be fire-and-forget
+    with explicit .catch(err => this.logger.warn(...))
+
+Code Quality — Python:
+  - All data structures use dataclasses or Pydantic models.
+  - All MongoDB calls use motor (async). Never pymongo sync.
+  - Use Python logging module, not print().
+  - Type hints on all function signatures.
+  - All errors are typed exceptions.
+
+Before each phase:
+  - Read existing relevant files before writing anything.
+  - If something in the existing codebase contradicts this spec,
+    flag it clearly and adapt sensibly. Do not blindly overwrite.
+
+After each phase, print:
+  ✅ What was built
+  📁 Files created and modified (full paths)
+  📊 Any metrics or counts (impressions generated, tests passed, etc.)
+  ⚠️  Any deviations from spec and the reason
+  ▶️  What Phase N+1 will do
+  Then STOP and wait for "proceed."
+
+
+
+
+
+  Root Cause Analysis — Interacted Programs Not Rising to Top
+There are three distinct bugs — each affecting a different ranking mode:
+
+Bug 1: behavioralScore has a constant +0.30 floor for everyone (breaks behavioral & hybrid mode)
+typescript
+// Line 392 — Search Query Align
+behavioralScore += w.SEARCH_QUERY_ALIGN * 1.0;  // +0.15 for ALL programs
+// Line 410 — Dwell Time
+behavioralScore += w.DWELL_TIME * 1.0;           // +0.15 for ALL programs
+SEARCH_QUERY_ALIGN and DWELL_TIME are not tracked — they always get a score of 1.0 for every single program. This means every program starts with a +0.30 behavioral floor, before any real signals are applied.
+
+The clicked program gets: 0.30 (floor) + 0.20 (click) = 0.50 An un-clicked program gets: 0.30 (floor) + 0.00 = 0.30
+
+The gap is only 0.20 across a 1.0 range — but since APPLICATIONS also adds 0.30 if applied, programs you've applied to score 0.60 even with zero clicks. The click signal is diluted by the constant noise floor.
+
+Bug 2: trending mode reads clicks from a re-declared local variable (bug on line 433)
+typescript
+// Line 431 — used for f_program_popularity (onboarding feature)
+const popularity = (ap.favouriteBy?.length || 0) + (ap.redirected_students?.length || 0);
+// Line 433 — reads clicks correctly
+const clicks = clickCountMap.get(apIdStr) || 0;
+// Line 444 — BUT re-declares `popularity` LOCAL to the else-block!
+} else {
+  const popularity = (ap.favouriteBy?.length || 0) + (ap.redirected_students?.length || 0) + clicks;
+  finalScore = popularity * mouBoost * freshnessBoost;
+This actually looks OK as a re-declaration in the else block. The clicks variable on line 433 captures clickCountMap.get(apIdStr). Let me verify the real trending bug more carefully — the issue is that the clicks variable on line 433 is in scope and used in the else block on line 444. This part works correctly.
+
+The real trending bug is: getRecentGlobalEvents only returns the last 500 events globally, ordered by most recent. With 3,192 students being active, your clicks may be pushed out of that 500-event window by other users' events, and never counted.
+
+Bug 3: onboarding mode completely ignores all clicks (most impactful for logged-in users)
+typescript
+if (scoringMode === 'onboarding') {
+  finalScore = onboardingScore * mouBoost * freshnessBoost;
+  // ↑ clicks never contribute here at all
+A logged-in user with onboarding preferences set stays in 'onboarding' mode until they accumulate 3+ events (BEHAVIORAL_EVENT_THRESHOLD: 3). Until then, clicking a program 100 times has zero effect on their personalized ranking.
+
+Summary Table
+Bug	Mode affected	Effect
+Constant +0.30 noise floor from untracked SEARCH_QUERY_ALIGN + DWELL_TIME	behavioral, hybrid	Compresses the effective click signal from 20% to ~14% of total spread
+Global event window too small (500 events)	trending	Your clicks get evicted from the window if other users are more active
+onboarding mode ignores all behavioral signals	onboarding (< 3 events)	Clicks have zero impact until the threshold is crossed
+The most impactful fix is the untracked signals giving a constant score. Would you like me to fix all three? The fixes are:
+
+Untracked signals → score 0 instead of 1.0 (they shouldn't contribute if no data exists)
+Raise global event limit from 500 to 5000
+Lower BEHAVIORAL_EVENT_THRESHOLD from 3 to 1 so the first click already enables hybrid mode
