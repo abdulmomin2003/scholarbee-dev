@@ -7,14 +7,14 @@ export const RECOMMENDATION_SCORING_CONFIG = {
   // Alpha (α) is the weight given to onboarding preferences.
   // It starts high for cold-start and decreases as more behavioral data is collected.
   INITIAL_ONBOARDING_WEIGHT_ALPHA: 0.7,
-  
+
   // Beta (β) is the weight given to behavioral logs (clicks, applications, favorites, search).
   // It grows as more user interaction data is logged.
   INITIAL_BEHAVIORAL_WEIGHT_BETA: 0.3,
 
   // Alpha weight to use when user has passed the behavioral interaction threshold.
   POST_THRESHOLD_ONBOARDING_WEIGHT_ALPHA: 0.4,
-  
+
   // Beta weight to use when user has passed the behavioral interaction threshold.
   POST_THRESHOLD_BEHAVIORAL_WEIGHT_BETA: 0.6,
 
