@@ -1,0 +1,121 @@
+import { ElasticsearchAdmissionProgramDocument } from '@/types/admission-program.types';
+
+export const mockPrograms: ElasticsearchAdmissionProgramDocument[] = [
+  {
+    _id: 'mock-program-1',
+    campus_image: '/assets/png/university_placeholder.png',
+    location_details: {
+      complete_address: '123 University Avenue, Boston, MA 02115',
+      city: 'Boston',
+      state: 'Massachusetts',
+      country: 'United States',
+      latitude: 42.3398,
+      longitude: -71.0882
+    },
+    university_logo: '/assets/png/university_placeholder.png',
+    program_title: 'Master of Science in Computer Science',
+    study_mode: 'Full-time',
+    first_semester_fee: 45000,
+    payment_schedule: 'per_semester',
+    university_id: 'mock-university-1',
+    university_name: 'Harvard University',
+    university_slug: 'harvard-university',
+    campus_id: 'mock-campus-1',
+    campus_name: 'Main Campus',
+    program_id: 'mock-program-id-1',
+    admission_id: 'mock-admission-1',
+    degree_level: 'Masters',
+    intake_period: 'Fall 2024',
+    admission_startdate: '2024-01-01',
+    admission_enddate: '2024-06-30',
+    major: 'Computer Science',
+    currency: 'USD',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    isFavorite: false,
+    session_term: ''
+  },
+  {
+    _id: 'mock-program-2',
+    campus_image: '/assets/png/university_placeholder.png',
+    location_details: {
+      complete_address: '350 Serra Mall, Stanford, CA 94305',
+      city: 'Stanford',
+      state: 'California',
+      country: 'United States',
+      latitude: 37.4275,
+      longitude: -122.1697
+    },
+    university_logo: '/assets/png/university_placeholder.png',
+    program_title: 'Bachelor of Business Administration',
+    study_mode: 'Full-time',
+    first_semester_fee: 52000,
+    payment_schedule: 'per_semester',
+    university_id: 'mock-university-2',
+    university_name: 'Stanford University',
+    university_slug: 'stanford-university',
+    campus_id: 'mock-campus-2',
+    campus_name: 'Main Campus',
+    program_id: 'mock-program-id-2',
+    admission_id: 'mock-admission-2',
+    degree_level: 'Bachelors',
+    intake_period: 'Spring 2024',
+    admission_startdate: '2024-02-01',
+    admission_enddate: '2024-08-31',
+    major: 'Business Administration',
+    currency: 'USD',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    isFavorite: false,
+    session_term: ''
+  },
+  {
+    _id: 'mock-program-3',
+    campus_image: '/assets/png/university_placeholder.png',
+    location_details: {
+      complete_address: '77 Massachusetts Ave, Cambridge, MA 02139',
+      city: 'Cambridge',
+      state: 'Massachusetts',
+      country: 'United States',
+      latitude: 42.3601,
+      longitude: -71.0942
+    },
+    university_logo: '/assets/png/university_placeholder.png',
+    program_title: 'Doctor of Philosophy in Engineering',
+    study_mode: 'Full-time',
+    first_semester_fee: 48000,
+    payment_schedule: 'per_semester',
+    university_id: 'mock-university-3',
+    university_name: 'MIT',
+    university_slug: 'mit',
+    campus_id: 'mock-campus-3',
+    campus_name: 'Main Campus',
+    program_id: 'mock-program-id-3',
+    admission_id: 'mock-admission-3',
+    degree_level: 'PhD',
+    intake_period: 'Fall 2024',
+    admission_startdate: '2024-01-15',
+    admission_enddate: '2024-07-15',
+    major: 'Engineering',
+    currency: 'USD',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+    isFavorite: false,
+    session_term: ''
+  }
+];
+
+export const mockProgramsResponse = {
+  docs: mockPrograms,
+  pagination: {
+    totalDocs: 3,
+    limit: 5,
+    totalPages: 1,
+    page: 1,
+    pagingCounter: 1,
+    hasPrevPage: false,
+    hasNextPage: false,
+    prevPage: null,
+    nextPage: null
+  }
+};

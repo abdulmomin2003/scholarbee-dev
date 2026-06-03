@@ -1,0 +1,53 @@
+{
+  "name": "next-network-debugger",
+  "version": "1.0.0",
+  "description": "Zero-dependency network inspector for Next.js with server-side tracing",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.tsx src/server.ts --format esm,cjs --dts --clean --minify --external react,react-dom,next",
+    "dev": "tsup src/index.tsx src/server.ts --format esm,cjs --watch --dts --external react,react-dom,next",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nextjs",
+    "network",
+    "debugger",
+    "telemetry",
+    "tracing",
+    "fetch"
+  ],
+  "author": "Ali Tahir",
+  "license": "MIT",
+  "peerDependencies": {
+    "next": ">=13.4.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "next": "14.2.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.1.0",
+    "typescript": "^5.4.5"
+  }
+}

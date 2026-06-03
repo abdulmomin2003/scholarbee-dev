@@ -1,0 +1,197 @@
+$background-color: #f4f7ff;
+$black-text: #252525;
+$primary-color: #004ae0;
+$gray-text: #676d75;
+
+.bg-white {
+  background-color: white;
+}
+.bg-light-blue {
+  background-color: $background-color;
+}
+.bg-red {
+  background-color: red;
+}
+.bg-green {
+  background-color: green;
+}
+.bg-primary {
+  background-color: $primary-color;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-black {
+  color: $black-text;
+}
+.text-gray {
+  color: $gray-text;
+}
+.text-white {
+  color: white;
+}
+.text-primary {
+  color: $primary-color;
+}
+.load-more-btn {
+  padding: 26px 76px;
+}
+.no-border {
+  border: none;
+}
+
+//flex
+.flex {
+  display: flex;
+}
+.flex-column {
+  flex-direction: column;
+}
+.flex-row {
+  flex-direction: row;
+}
+.items-center {
+  align-items: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-center {
+  justify-content: center;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-inline-block {
+  display: inline-block;
+}
+
+// font wights
+.font-800 {
+  font-weight: 800;
+}
+.font-700 {
+  font-weight: 700;
+}
+.font-600 {
+  font-weight: 600;
+}
+.font-500 {
+  font-weight: 500;
+}
+
+// margins
+@for $i from 1 through 120 {
+  .m-#{$i} {
+    margin: #{$i}px;
+  }
+  .ml-#{$i} {
+    margin-left: #{$i}px;
+  }
+  .mb-#{$i} {
+    margin-bottom: #{$i}px;
+  }
+  .mr-#{$i} {
+    margin-right: #{$i}px;
+  }
+  .mt-#{$i} {
+    margin-top: #{$i}px;
+  }
+  .mh-#{$i} {
+    margin-left: #{$i}px;
+    margin-right: #{$i}px;
+  }
+  .mv-#{$i} {
+    margin-top: #{$i}px;
+    margin-bottom: #{$i}px;
+  }
+}
+
+// paddings
+@for $i from 1 through 120 {
+  .p-#{$i} {
+    padding: #{$i}px;
+  }
+  .pl-#{$i} {
+    padding-left: #{$i}px;
+  }
+  .pb-#{$i} {
+    padding-bottom: #{$i}px;
+  }
+  .pr-#{$i} {
+    padding-right: #{$i}px;
+  }
+  .pt-#{$i} {
+    padding-top: #{$i}px;
+  }
+  .ph-#{$i} {
+    padding-left: #{$i}px;
+    padding-right: #{$i}px;
+  }
+  .pv-#{$i} {
+    padding-top: #{$i}px;
+    padding-bottom: #{$i}px;
+  }
+}
+
+//font sizes
+@for $i from 10 through 60 {
+  .font-#{$i} {
+    font-size: #{$i}px;
+  }
+}
+
+//line heights
+@for $i from 12 through 60 {
+  .line-height-#{$i} {
+    line-height: #{$i}px;
+  }
+}
+
+// width and height
+@for $i from 1 through 1440 {
+  .max-w-#{$i} {
+    max-width: #{$i}px;
+  }
+  .max-h-#{$i} {
+    max-height: #{$i}px;
+  }
+  .min-w-#{$i} {
+    min-width: #{$i}px;
+  }
+  .min-h-#{$i} {
+    min-height: #{$i}px;
+  }
+  .w-#{$i} {
+    width: #{$i}px;
+  }
+  .h-#{$i} {
+    height: #{$i}px;
+  }
+}
+
+// widths in percentage
+.width-50 {
+  width: 50%;
+}
+.width-100 {
+  width: 100%;
+}
+
+//border-radius
+@for $i from 1 through 50 {
+  .rounded-#{$i} {
+    border-radius: #{$i}px;
+  }
+}
+
+.responsive-48 {
+  font-size: 46px;
+  @media (max-width: 768px) {
+    font-size: 32px;
+  }
+}
+.relative {
+  position: relative;
+}

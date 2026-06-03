@@ -1,0 +1,65 @@
+{
+  "auth": {
+    "signUp": {
+      "title": "اندراج کریں",
+      "subtitle": "اپنا مفت اکاؤنٹ بنائیں اور {city} میں اپنے لیے بہترین یونیورسٹی کے اختیارات تلاش کریں۔",
+      "createAccount": "اندراج کریں",
+      "welcome": "خوش آمدید! براہ کرم اپنی تفصیلات درج کریں",
+      "signUpButton": "اندراج کریں",
+      "alreadyHaveAccount": "پہلے سے اکاؤنٹ ہے؟",
+      "signIn": "سائن ان کریں",
+      "orContinueWith": "یا اس کے ساتھ جاری رکھیں",
+      "continueWithGoogle": "Google کے ساتھ جاری رکھیں",
+      "someoneReferred": "کسی نے آپ کو بھیجا؟ بس اس باکس کو ٹک کریں۔",
+      "whereDidYouHear": "آپ نے ScholarBee کے بارے میں کہاں سنا؟",
+      "enterReferralCode": "ریفرل کوڈ درج کریں",
+      "enterReferralCodePlaceholder": "ریفرل کوڈ یہاں درج کریں",
+      "agreeTo": "اس سے متفق ہوں",
+      "termsAndConditions": "شرائط و ضوابط",
+      "and": "اور",
+      "privacyPolicy": "رازداری کی پالیسی",
+      "placeholders": {
+        "firstName": "پہلا نام",
+        "lastName": "آخری نام",
+        "phoneNumber": "فون نمبر",
+        "email": "ای میل",
+        "password": "پاس ورڈ",
+        "confirmPassword": "پاس ورڈ کی تصدیق کریں"
+      },
+      "referralSources": {
+        "instagram": "انسٹاگرام",
+        "tiktok": "ٹک ٹاک",
+        "facebook": "فیس بک",
+        "others": "دوسرے"
+      },
+      "sideImageText": "ScholarBee پر ایک کلک کے ساتھ تعلیمی صلاحیتوں کی دنیا دریافت کریں"
+    },
+    "signIn": {
+      "title": "سائن ان کریں",
+      "subtitle": "اپنی درخواست کی صورتحال دیکھنے اور نئی اپ ڈیٹس حاصل کرنے کے لیے سائن ان کریں۔",
+      "signInToAccount": "سائن ان کریں",
+      "welcomeBack": "خوش آمدید! براہ کرم اپنی تفصیلات درج کریں",
+      "loginButton": "لاگ ان",
+      "forgotPassword": "پاس ورڈ بھول گئے؟",
+      "dontHaveAccount": "ابھی تک اکاؤنٹ نہیں ہے؟",
+      "createNewAccount": "نیا اکاؤنٹ بنائیں",
+      "orContinueWith": "یا اس کے ساتھ جاری رکھیں",
+      "continueWithGoogle": "Google کے ساتھ جاری رکھیں",
+      "placeholders": {
+        "email": "ای میل",
+        "password": "پاس ورڈ"
+      },
+      "sideImageText": "ScholarBee پر ایک کلک کے ساتھ تعلیمی صلاحیتوں کی دنیا دریافت کریں",
+      "pleaseLogIn": "براہ کرم اس صفحے تک رسائی کے لیے لاگ ان کریں",
+      "loading": "لوڈ ہو رہا ہے...",
+      "termsAndConditions": "شرائط و ضوابط",
+      "privacyPolicy": "رازداری کی پالیسی"
+    },
+    "cities": {
+      "Islamabad": "اسلام آباد",
+      "Lahore": "لاہور",
+      "Peshawar": "پشاور",
+      "Karachi": "کراچی"
+    }
+  }
+}

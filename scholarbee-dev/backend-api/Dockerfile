@@ -1,0 +1,47 @@
+FROM node:18-alpine AS development
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies with legacy peer deps flag to resolve conflicts
+RUN npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+FROM node:18-alpine AS production
+
+# Set NODE_ENV (set to production by default; can be overridden by passing --build-arg NODE_ENV=development)
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies with legacy peer deps flag
+RUN npm install --omit=dev --legacy-peer-deps
+
+# Copy built application from development stage
+COPY --from=development /usr/src/app/dist ./dist
+
+# Copy email templates directory
+COPY --from=development /usr/src/app/templates ./templates
+
+# Copy public directory for Swagger auth plugin
+COPY --from=development /usr/src/app/public ./public
+
+# Expose API port (handles both HTTP and WebSockets)
+EXPOSE 3010
+
+# Start the server
+# ! Don't change this to `node dist/src/main`.
+CMD ["npm", "run", "start:prod"]

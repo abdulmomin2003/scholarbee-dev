@@ -1,0 +1,823 @@
+[
+  {
+    "user": {
+      "id": "6a1d58828a58dd5fccabd98c",
+      "full_name": "Demo Student for Recommendations",
+      "email": "recs-demo-student@scholarbee.com",
+      "user_type": "Student",
+      "created_at": "2026-06-01T10:01:38.720Z",
+      "onboarding_preferences": {
+        "degree_goal": "Bachelors",
+        "preferred_cities": [
+          "Islamabad",
+          "Lahore"
+        ],
+        "preferred_fields_of_study": [
+          "Computer Science",
+          "Data Science"
+        ],
+        "semester_fee_range": {
+          "min": 100000,
+          "max": 300000,
+          "created_at": "2026-06-01T10:01:38.870Z",
+          "updated_at": "2026-06-01T10:01:38.870Z"
+        },
+        "previous_marks_range": {
+          "min_percent": 75,
+          "max_percent": 95,
+          "created_at": "2026-06-01T10:01:38.871Z",
+          "updated_at": "2026-06-01T10:01:38.871Z"
+        },
+        "version": 1,
+        "updated_at": "2026-06-01T10:01:38.871Z",
+        "created_at": "2026-06-01T10:01:38.871Z"
+      }
+    },
+    "program_recommendations": [
+      {
+        "program_title": "Bachelor of Science in Computer Science (BSCS)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "Related to your preferred field",
+          "Located in Islamabad",
+          "Fits your budget",
+          "Based on your views",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Software Engineering (BSSE)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "Related to your preferred field",
+          "Located in Islamabad",
+          "Fits your budget",
+          "Based on your views",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Software Engineering (BSSE)",
+        "university_name": "Bahria University",
+        "campus_name": "Bahria University - Islamabad H 11 Campus",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "Related to your preferred field",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Robotics and Intelligent Systems (BSRIS)",
+        "university_name": "Bahria University",
+        "campus_name": "Bahria University - Islamabad H 11 Campus",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "Related to your preferred field",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Computer Science (BSCS)",
+        "university_name": "Bahria University",
+        "campus_name": "Bahria University - Islamabad H 11 Campus",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "Related to your preferred field",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      }
+    ],
+    "university_recommendations": [
+      {
+        "university_name": "Lahore Leads University",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "University of Engineering and Technology Lahore",
+        "city": "Narowal",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Superior University Lahore ",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "COMSATS",
+        "city": "Abbottabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Capital University of Science and Technology - CUST",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "ScholarBee Verified Partner"
+        ]
+      }
+    ]
+  },
+  {
+    "user": {
+      "id": "6a1d537913c590b6f90490dd",
+      "full_name": "Momin",
+      "email": "i221326@nu.edu.pk",
+      "user_type": "Student",
+      "created_at": "2026-06-01T09:40:09.854Z",
+      "onboarding_preferences": {
+        "degree_goal": "Masters",
+        "preferred_cities": [
+          "Lahore",
+          "Islamabad",
+          "Multan"
+        ],
+        "preferred_fields_of_study": [
+          "Computer Science & Information Technology",
+          "Software Engineering"
+        ],
+        "semester_fee_range": {
+          "min": 150000,
+          "max": 300000,
+          "created_at": "2026-06-01T09:41:58.898Z",
+          "updated_at": "2026-06-01T09:41:58.898Z"
+        },
+        "previous_marks_range": {
+          "min_percent": 80,
+          "max_percent": 100,
+          "created_at": "2026-06-01T09:41:58.900Z",
+          "updated_at": "2026-06-01T09:41:58.900Z"
+        },
+        "start_timeline": {
+          "type": "within_6_months",
+          "selected_at": "2026-06-01T09:41:58.814Z",
+          "created_at": "2026-06-01T09:41:58.901Z",
+          "updated_at": "2026-06-01T09:41:58.901Z"
+        },
+        "version": 1,
+        "updated_at": "2026-06-01T09:41:58.901Z",
+        "created_at": "2026-06-01T09:41:58.901Z"
+      }
+    },
+    "program_recommendations": [
+      {
+        "program_title": "Master of Science in Artificial Intelligence (MSAI)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Computer Science (MSCS)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Computer Engineering (MSCE)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Computer Science (MSCS)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Artificial Intelligence (MSAI)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      }
+    ],
+    "university_recommendations": [
+      {
+        "university_name": "Lahore Leads University",
+        "city": "Lahore",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "University of Engineering and Technology Lahore",
+        "city": "Narowal",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Superior University Lahore ",
+        "city": "Lahore",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "COMSATS",
+        "city": "Abbottabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Capital University of Science and Technology - CUST",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      }
+    ]
+  },
+  {
+    "user": {
+      "id": "6a1ca58b520cbc85dc51d387",
+      "full_name": "Abdul Momin Abbasi",
+      "email": "abbasimomin0@gmail.com",
+      "user_type": "Student",
+      "created_at": "2026-05-31T21:18:03.220Z",
+      "onboarding_preferences": {
+        "degree_goal": "Masters",
+        "preferred_cities": [
+          "Islamabad",
+          "Rawalpindi",
+          "Lahore"
+        ],
+        "preferred_fields_of_study": [
+          "Computer Science & Information Technology",
+          "Information Technology (IT)",
+          "Information Technology",
+          "Software Engineering"
+        ],
+        "semester_fee_range": {
+          "min": 85000,
+          "max": 150000,
+          "created_at": "2026-05-31T21:19:09.307Z",
+          "updated_at": "2026-05-31T21:19:09.307Z"
+        },
+        "previous_marks_range": {
+          "min_percent": 80,
+          "max_percent": 100,
+          "created_at": "2026-05-31T21:19:09.307Z",
+          "updated_at": "2026-05-31T21:19:09.307Z"
+        },
+        "start_timeline": {
+          "type": "within_6_months",
+          "selected_at": "2026-05-31T21:19:09.218Z",
+          "created_at": "2026-05-31T21:19:09.307Z",
+          "updated_at": "2026-05-31T21:19:09.307Z"
+        },
+        "version": 1,
+        "updated_at": "2026-05-31T21:19:09.307Z",
+        "created_at": "2026-05-31T21:19:09.307Z"
+      }
+    },
+    "program_recommendations": [
+      {
+        "program_title": "Master of Science in Artificial Intelligence (MSAI)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Slightly above preferred budget",
+          "Favourited program",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Software Engineering (MSSE)",
+        "university_name": "Superior University Lahore ",
+        "campus_name": "Superior University - Gold Campus Lahore ",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Lahore",
+          "Fits your budget",
+          "Favourited program",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Philosophy in Computer Science (MPhil CS)",
+        "university_name": "Lahore Leads University",
+        "campus_name": "Lahore Leads University, Main Campus",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Lahore",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Philosophy in Information Technology (MPhil IT)",
+        "university_name": "Lahore Leads University",
+        "campus_name": "Lahore Leads University, Main Campus",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Lahore",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Master of Science in Computer Science (MSCS)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Slightly above preferred budget",
+          "ScholarBee Verified Campus"
+        ]
+      }
+    ],
+    "university_recommendations": [
+      {
+        "university_name": "Lahore Leads University",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "University of Engineering and Technology Lahore",
+        "city": "Narowal",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Superior University Lahore ",
+        "city": "Lahore",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "COMSATS",
+        "city": "Abbottabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Capital University of Science and Technology - CUST",
+        "city": "Islamabad",
+        "scoring_mode": "hybrid",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      }
+    ]
+  },
+  {
+    "user": {
+      "id": "6a0aaea82a2a6f7c9e00606d",
+      "full_name": "Saim Abbasi",
+      "email": "abbasisaim950@gmail.com",
+      "user_type": "Student",
+      "created_at": "2026-05-18T06:16:08.239Z",
+      "onboarding_preferences": {
+        "degree_goal": "Bachelors",
+        "preferred_cities": [
+          "Islamabad"
+        ],
+        "preferred_fields_of_study": [
+          "Accounting & Finance"
+        ],
+        "semester_fee_range": {
+          "min": 0,
+          "max": 85000,
+          "created_at": "2026-05-18T06:17:24.048Z",
+          "updated_at": "2026-05-18T06:17:24.048Z"
+        },
+        "previous_marks_range": {
+          "min_percent": 70,
+          "max_percent": 80,
+          "created_at": "2026-05-18T06:17:24.048Z",
+          "updated_at": "2026-05-18T06:17:24.048Z"
+        },
+        "start_timeline": {
+          "type": null,
+          "created_at": "2026-05-18T06:17:24.048Z",
+          "updated_at": "2026-05-18T06:17:24.048Z"
+        },
+        "version": 1,
+        "updated_at": "2026-05-18T06:17:24.048Z",
+        "created_at": "2026-05-18T06:17:24.048Z"
+      }
+    },
+    "program_recommendations": [
+      {
+        "program_title": "Association of Chartered Certified Accountants (ACCA)",
+        "university_name": "The Millennium Universal College ",
+        "campus_name": "The Millennium Universal College - TMUC Main Campus ",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Accounting and Finance (BSAF)",
+        "university_name": "Ibadat International University Islamabad",
+        "campus_name": "Ibadat International University - Islamabad Campus",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Accounting and Finance (BSAF)",
+        "university_name": "The Millennium Universal College ",
+        "campus_name": "The Millennium Universal College - TMUC Main Campus ",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Accounting and Finance (BSAF)",
+        "university_name": "Ibadat International University Islamabad",
+        "campus_name": "Ibadat International University - Islamabad Campus",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Accounting and Finance (BSAF)",
+        "university_name": "The Millennium Universal College ",
+        "campus_name": "The Millennium Universal College - TMUC Main Campus ",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      }
+    ],
+    "university_recommendations": [
+      {
+        "university_name": "COMSATS",
+        "city": "Abbottabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Capital University of Science and Technology - CUST",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Ibadat International University Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "National University of Sciences and Technology",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Bahria University",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      }
+    ]
+  },
+  {
+    "user": {
+      "id": "6a0aaa9c2a2a6f7c9e005f5e",
+      "full_name": "Hammad zada",
+      "email": "hammadzada37@gmail.com",
+      "user_type": "Student",
+      "created_at": "2026-05-18T05:58:52.239Z",
+      "onboarding_preferences": {
+        "degree_goal": "Bachelors",
+        "preferred_cities": [
+          "Islamabad",
+          "Rawalpindi",
+          "Peshawar"
+        ],
+        "preferred_fields_of_study": [
+          "Pharmacy & Pharmaceutical Sciences",
+          "Allied Health Sciences",
+          "Accounting & Finance",
+          "Psychology",
+          "Public Health",
+          "Clinical Psychology",
+          "Medicine & Surgery",
+          "Physical Therapy & Rehabilitation",
+          "Nursing & Midwifery"
+        ],
+        "semester_fee_range": {
+          "min": 150000,
+          "max": 300000,
+          "created_at": "2026-05-18T06:00:41.694Z",
+          "updated_at": "2026-05-18T06:00:41.694Z"
+        },
+        "previous_marks_range": {
+          "min_percent": 70,
+          "max_percent": 80,
+          "created_at": "2026-05-18T06:00:41.694Z",
+          "updated_at": "2026-05-18T06:00:41.694Z"
+        },
+        "start_timeline": {
+          "type": "within_6_months",
+          "selected_at": "2026-05-18T06:00:39.282Z",
+          "created_at": "2026-05-18T06:00:41.694Z",
+          "updated_at": "2026-05-18T06:00:41.694Z"
+        },
+        "version": 1,
+        "updated_at": "2026-05-18T06:00:41.697Z",
+        "created_at": "2026-05-18T06:00:41.697Z"
+      }
+    },
+    "program_recommendations": [
+      {
+        "program_title": "Association of Chartered Certified Accountants (ACCA)",
+        "university_name": "The Millennium Universal College ",
+        "campus_name": "The Millennium Universal College - TMUC Main Campus ",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Doctor of Pharmacy (Pharm-D)",
+        "university_name": " Abasyn University",
+        "campus_name": "Abasyn University, Peshawar",
+        "city": "Peshawar",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Peshawar",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Surgical Technology (BSST)",
+        "university_name": "Comwave Institute of Sciences and Information Technology",
+        "campus_name": " Comwave Institute Islamabad campus",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Bachelor of Science in Anesthesia Technology (BSAT)",
+        "university_name": "Comwave Institute of Sciences and Information Technology",
+        "campus_name": " Comwave Institute Islamabad campus",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "ScholarBee Verified Campus"
+        ]
+      },
+      {
+        "program_title": "Doctor of Pharmacy (Pharm-D)",
+        "university_name": "Capital University of Science and Technology - CUST",
+        "campus_name": "CUST Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Matches your degree goal",
+          "In your preferred field of study",
+          "Located in Islamabad",
+          "Fits your budget",
+          "ScholarBee Verified Campus"
+        ]
+      }
+    ],
+    "university_recommendations": [
+      {
+        "university_name": "COMSATS",
+        "city": "Abbottabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Capital University of Science and Technology - CUST",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Ibadat International University Islamabad",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "National University of Sciences and Technology",
+        "city": "Islamabad",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      },
+      {
+        "university_name": "Shaheed Benazir Bhutto Women University (SBBWU), Peshawar",
+        "city": "Peshawar",
+        "scoring_mode": "onboarding",
+        "match_reasons": [
+          "Located in your preferred city",
+          "Offers your preferred fields of study",
+          "ScholarBee Verified Partner"
+        ]
+      }
+    ]
+  }
+]

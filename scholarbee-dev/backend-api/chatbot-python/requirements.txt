@@ -1,0 +1,6 @@
+google-genai
+motor
+python-dotenv
+fastembed
+numpy
+pymongo

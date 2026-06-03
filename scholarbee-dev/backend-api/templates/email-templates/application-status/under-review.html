@@ -1,0 +1,153 @@
+<!-- TEMPLATE: {"name": "Application Under Review", "subject": "Application Under Review - {{programName}}", "variables": ["applicantName", "programName", "institute", "reviewTimeline", "dashboardUrl"], "category": "application_status"} -->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarbee.pk - Application Under Review</title>
+    <style type="text/css">
+        /* Client-specific styles to reset defaults */
+        body,
+        table,
+        td,
+        a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table,
+        td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+
+        a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: none !important;
+            font-size: inherit !important;
+            font-family: inherit !important;
+            font-weight: inherit !important;
+            line-height: inherit !important;
+        }
+
+        /* Font stack for email compatibility */
+        body {
+            font-family: 'Inter', 'Roboto', Helvetica, Arial, sans-serif;
+        }
+
+        .main-color {
+            background-color: #0B3C95 !important;
+        }
+
+        .text-main-color {
+            color: #0B3C95 !important;
+        }
+
+        .neutral-bg {
+            background-color: #F6F7F8;
+        }
+    </style>
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #F6F7F8; font-family: 'Inter', 'Roboto', Helvetica, Arial, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                    style="max-width: 600px; background-color: #FFFFFF; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); overflow: hidden;">
+                    <tr>
+                        <td align="center" style="background-color: #0B3C95; padding: 24px;">
+                            <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto 8px;">
+                                <tr>
+                                    <td style="background-color: #0B3C95; padding: 4px; border-radius: 4px;">
+                                        <img alt="Scholarbee.pk Logo"
+                                            src="{{logoUrl}}"
+                                            width="98"
+                                            style="height: auto; display: block; border: 0; background: #0B3C95">
+                                    </td>
+                                </tr>
+                            </table>
+                            <h1 style="font-size: 28px; font-weight: 700; color: #FFFFFF; margin: 0; padding: 0;">
+                                Application Under Review</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 32px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <p
+                                            style="color: #666666; font-size: 16px; line-height: 1.5; margin: 0 0 24px; padding: 0;">
+                                            Thank you for your application. We appreciate your patience!</p>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="text-align: left; font-size: 16px; color: #666666; margin: 0 0 16px;">Dear
+                                {{applicantName}}, (You can customize this if you have the name)</p>
+                            <p style="font-size: 16px; line-height: 1.5; color: #666666; margin: 0 0 16px; padding: 0;">
+                                Your application for the <span
+                                    style="font-weight: 600; color: #333333;">{{programName}}</span> program at <span
+                                    style="font-weight: 600; color: #333333;">{{institute}}</span> has been successfully
+                                submitted and is currently **under review** by the admissions committee.
+                            </p>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                                style="background-color: #EFF6FF; border: 1px solid #BFDBFE; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                                <tr>
+                                    <td>
+                                        <h3
+                                            style="font-size: 18px; font-weight: 600; color: #1D4ED8; margin: 0 0 8px; padding: 0;">
+                                            What Happens Next?</h3>
+                                        <p style="font-size: 15px; line-height: 1.5; color: #374151; margin: 0;">
+                                            The review process typically takes **{{reviewTimeline}}**. We will notify
+                                            you immediately via email as soon as a final decision has been made.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="font-size: 16px; line-height: 1.5; color: #666666; margin: 0 0 32px; padding: 0;">
+                                You can check your current status and ensure all documents are complete by visiting your
+                                dashboard.
+                            </p>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{dashboardUrl}}" target="_blank"
+                                            style="display: inline-block; background-color: #0B3C95; color: #FFFFFF; font-weight: 700; font-size: 16px; padding: 12px 32px; border-radius: 8px; text-decoration: none; transition: background-color 0.3s ease;">
+                                            Go to Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center"
+                            style="background-color: #F6F7F8; padding: 24px; border-top: 1px solid #E5E7EB;">
+                            <p style="font-size: 12px; color: #999999; margin: 0; padding: 0;">© 2026 Scholarbee.pk. All
+                                rights reserved.</p>
+                            <p style="font-size: 12px; color: #999999; margin: 4px 0 0; padding: 0;">If you have any
+                                questions, please contact our support team.</p>
+                            <p style="font-size: 12px; color: #999999; margin: 8px 0 0; padding: 0;">
+                                <a href="tel:{{supportPhoneTel}}" style="color: #999999; text-decoration: none;">{{supportPhone}}</a>
+                                &nbsp;|&nbsp;
+                                <a href="mailto:{{supportEmail}}" style="color: #999999; text-decoration: none;">{{supportEmail}}</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

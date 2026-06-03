@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"notificationId":{"$numberInt":"1"},"userId":{"$numberInt":"1"}},"name":"notificationId_1_userId_1","background":true,"unique":true}],"uuid":"36821d177dd544978559540f925b1bef","collectionName":"notificationreadreceipts","type":"collection"}

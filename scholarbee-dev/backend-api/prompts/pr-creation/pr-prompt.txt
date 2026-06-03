@@ -1,0 +1,35 @@
+Create a PR description for my changes against the develop branch. Follow these guidelines:
+
+**Primary Focus (60% of content):**
+- Clearly explain what API consumers (frontend, mobile, external clients) need to know
+- Highlight any changes to API request/response structures
+- List all breaking changes that affect consumers
+- Specify migration steps if needed
+- Use simple, non-technical language where possible
+
+**Secondary Focus (30% of content):**
+- Mention major architectural changes or shifts
+- Note significant refactoring or code organization changes
+- Highlight performance improvements or optimizations
+- Keep technical details concise and high-level
+
+**Structure:**
+1. **What Changed** - Brief 2-3 sentence summary
+2. **Impact for Frontend/API Consumers** - Bullet points of what they need to know
+3. **Breaking Changes** - Explicitly list any breaking changes
+4. **Implementation Notes** (optional) - Only if there are significant architectural shifts
+5. **Testing** - Brief note on what was tested
+
+**Tone:**
+- Professional but accessible
+- Clear and direct
+- Avoid jargon unless necessary
+- Focus on "what" and "why" more than "how"
+
+**Length:**
+- Keep it concise (aim for 20-50 lines)
+- Don't be verbose
+- Prioritize actionable information
+
+Analyze my staged changes and create the PR description accordingly.
+

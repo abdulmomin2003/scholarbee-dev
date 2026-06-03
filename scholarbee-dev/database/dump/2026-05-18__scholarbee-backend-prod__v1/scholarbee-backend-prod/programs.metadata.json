@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"createdAt":{"$numberInt":"1"}},"name":"createdAt_1","background":true},{"v":{"$numberInt":"2"},"key":{"_deleted":{"$numberInt":"1"}},"name":"_deleted_1","background":true}],"uuid":"55626a1f9ac24de1b98acb5432df8e93","collectionName":"programs","type":"collection"}

@@ -1,0 +1,69 @@
+{
+  "IndexPage": {
+    "title": "Hello world!",
+    "description": "This is a description of the page."
+  },
+  "auth": {
+    "signUp": {
+      "title": "Create Account",
+      "subtitle": "Create your free account and find the best university options for you in {city}.",
+      "createAccount": "Create Account",
+      "welcome": "Welcome! Please enter your details",
+      "signUpButton": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign In",
+      "orContinueWith": "Or continue with",
+      "continueWithGoogle": "Continue with Google",
+      "someoneReferred": "Someone referred you? Just tick this box.",
+      "whereDidYouHear": "Where did you hear about ScholarBee?",
+      "enterReferralCode": "Enter Referral Code",
+      "enterReferralCodePlaceholder": "Enter Referral Code Here",
+      "agreeTo": "Agree to",
+      "termsAndConditions": "Terms and Conditions",
+      "and": "&",
+      "privacyPolicy": "Privacy Policy",
+      "placeholders": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "phoneNumber": "Phone Number",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password"
+      },
+      "referralSources": {
+        "instagram": "Instagram",
+        "tiktok": "Tiktok",
+        "facebook": "Facebook",
+        "others": "Others"
+      },
+      "sideImageText": "Discover a world of academic potential with a single click on ScholarBee."
+    },
+    "signIn": {
+      "title": "Sign In",
+      "subtitle": "Sign in to check your application status and see new updates.",
+      "signInToAccount": "Sign In to your account",
+      "welcomeBack": "Welcome back! Please enter your details",
+      "loginButton": "Login",
+      "forgotPassword": "Forgot password?",
+      "dontHaveAccount": "Don't have an account yet?",
+      "createNewAccount": "Create New Account",
+      "orContinueWith": "Or continue with",
+      "continueWithGoogle": "Continue with Google",
+      "placeholders": {
+        "email": "Email",
+        "password": "Password"
+      },
+      "sideImageText": "Discover a world of academic potential with a single click on ScholarBee.",
+      "pleaseLogIn": "Please log in to access this page",
+      "loading": "Loading...",
+      "termsAndConditions": "Terms and Conditions",
+      "privacyPolicy": "Privacy Policy"
+    },
+    "cities": {
+      "Islamabad": "Islamabad",
+      "Lahore": "Lahore",
+      "Peshawar": "Peshawar",
+      "Karachi": "Karachi"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+<svg width="49" height="49" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon" clip-path="url(#clip0_540_16496)">
+<g id="Clip path group">
+<mask id="mask0_540_16496" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="49" height="49">
+<g id="__lottie_element_38">
+<path id="Vector" d="M48.171 0.0253906H0.09375V48.1026H48.171V0.0253906Z" fill="white"/>
+</g>
+</mask>
+<g mask="url(#mask0_540_16496)">
+<g id="Group">
+<g id="Group_2">
+<g id="Group_3">
+<path id="Vector_2" d="M18.6543 23.6534C19.4951 24.7166 20.4207 25.7587 21.4271 26.7652C22.4336 27.7716 23.4756 28.6971 24.5389 29.538C26.5835 31.1551 29.4803 30.9866 31.3236 29.1433L31.9458 28.5211C33.7816 26.6852 36.7855 26.6852 38.6214 28.5211L41.0979 30.9975C45.5693 35.469 38.402 41.4977 35.54 41.9307C29.8793 43.7981 21.3019 40.7035 14.3954 33.7969C7.48883 26.8904 4.39412 18.313 6.26159 12.6523C6.69452 9.79038 12.7234 2.62304 17.1948 7.09445L19.6712 9.57084C21.5071 11.4067 21.5071 14.4108 19.6712 16.2465L19.049 16.8687C17.2057 18.712 17.0372 21.6088 18.6543 23.6534Z" stroke="#004AE0" stroke-width="1.61539" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g id="Group_4">
+<g id="Group_5">
+<g id="Group_6">
+<path id="Vector_3" d="M29.2891 12.7324C30.8081 13.0453 32.2021 13.7965 33.2987 14.8932C34.3798 15.9742 35.1254 17.3446 35.4461 18.8394" stroke="#004AE0" stroke-width="1.40464" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+<g id="Group_7">
+<g id="Group_8">
+<path id="Vector_4" d="M25.3047 8.69376C29.2634 7.89258 33.3602 9.12787 36.2162 11.9838C39.0675 14.8352 40.3037 18.9237 39.5099 22.8773" stroke="#004AE0" stroke-width="1.40464" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_540_16496">
+<rect width="48.0772" height="48.0772" fill="white" transform="translate(0.09375 0.0253906)"/>
+</clipPath>
+</defs>
+</svg>
