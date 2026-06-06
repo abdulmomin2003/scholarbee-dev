@@ -446,7 +446,7 @@ export class ScoringEngineService {
 
       // Combine
       let finalScore = 0;
-      if (scoringMode === 'onboarding') {
+      if ((scoringMode as string) === 'onboarding') {
         finalScore = onboardingScore * mouBoost * freshnessBoost;
       } else if (scoringMode === 'behavioral') {
         finalScore = behavioralScore * mouBoost * freshnessBoost;
