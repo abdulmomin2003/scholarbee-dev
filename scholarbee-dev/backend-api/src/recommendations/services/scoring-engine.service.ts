@@ -72,7 +72,11 @@ export class ScoringEngineService {
     const activeAdmissionsPromise = this.admissionModel
       .find({
         is_active: { $ne: false },
-        admission_deadline: { $gte: now },
+        $or: [
+          { admission_deadline: { $gte: now } },
+          { admission_deadline: { $exists: false } },
+          { admission_deadline: null },
+        ],
       })
       .select('_id')
       .lean()
@@ -578,7 +582,14 @@ export class ScoringEngineService {
 
     // Fetch active programs needed to calculate verified status, cities, fields, etc.
     const activeAdmissions = await this.admissionModel
-      .find({ admission_deadline: { $gte: new Date() } })
+      .find({
+        is_active: { $ne: false },
+        $or: [
+          { admission_deadline: { $gte: new Date() } },
+          { admission_deadline: { $exists: false } },
+          { admission_deadline: null },
+        ],
+      })
       .select('_id')
       .lean()
       .exec();
