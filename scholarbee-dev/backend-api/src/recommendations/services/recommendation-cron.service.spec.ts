@@ -47,38 +47,29 @@ describe('RecommendationCronService', () => {
     expect(cronService).toBeDefined();
   });
 
-  describe('recomputeRecommendations', () => {
-    it('should query for student users and call precomputation on recommendation service', async () => {
-      await cronService.recomputeRecommendations();
-
-      // Verify Mongoose query
-      expect(mockUserModel.find).toHaveBeenCalledWith({ user_type: 'Student' });
-      expect(mockUserModel.select).toHaveBeenCalledWith('_id');
-      expect(mockUserModel.lean).toHaveBeenCalled();
-      expect(mockUserModel.exec).toHaveBeenCalled();
+  describe('recomputeTrendingRecommendations', () => {
+    it('should call precomputeTrendingRecommendations on recommendation service', async () => {
+      await cronService.recomputeTrendingRecommendations();
 
       // Verify RecommendationService calls
       expect(recommendationService.precomputeTrendingRecommendations).toHaveBeenCalled();
-      expect(recommendationService.precomputeStudentRecommendations).toHaveBeenCalledWith('student_id_1');
-      expect(recommendationService.precomputeStudentRecommendations).toHaveBeenCalledWith('student_id_2');
     });
 
     it('should handle precomputation errors gracefully without crashing', async () => {
       jest
-        .spyOn(recommendationService, 'precomputeStudentRecommendations')
+        .spyOn(recommendationService, 'precomputeTrendingRecommendations')
         .mockRejectedValueOnce(new Error('Redis Timeout'));
 
-      await expect(cronService.recomputeRecommendations()).resolves.not.toThrow();
+      await expect(cronService.recomputeTrendingRecommendations()).resolves.not.toThrow();
 
       expect(recommendationService.precomputeTrendingRecommendations).toHaveBeenCalled();
-      expect(recommendationService.precomputeStudentRecommendations).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('manuallyTriggerPrecomputation', () => {
-    it('should invoke recomputeRecommendations', async () => {
+    it('should invoke recomputeTrendingRecommendations', async () => {
       const recomputeSpy = jest
-        .spyOn(cronService, 'recomputeRecommendations')
+        .spyOn(cronService, 'recomputeTrendingRecommendations')
         .mockResolvedValue(undefined);
 
       await cronService.manuallyTriggerPrecomputation();

@@ -54,4 +54,13 @@ export const RECOMMENDATION_SCORING_CONFIG = {
   // --- Time decay parameters for behavioral events (in days) ---
   // Events older than this will be weighted less (exponential decay)
   HALF_LIFE_DAYS: 30,
+
+  // --- Popularity blending weights ---
+  // Weight of popularity score in different personalized modes
+  ONBOARDING_POPULARITY_WEIGHT: 0.2, // 20% weightage for popularity in onboarding mode
+  BEHAVIORAL_POPULARITY_WEIGHT: 0.1, // 10% weightage for popularity in behavioral mode
+  HYBRID_POPULARITY_WEIGHT: 0.1,     // 10% weightage for popularity in hybrid mode
+
+  // Weight multiplier for application events compared to a single click in global popularity
+  APPLICATION_EVENT_POPULARITY_WEIGHT: 5.0,
 };

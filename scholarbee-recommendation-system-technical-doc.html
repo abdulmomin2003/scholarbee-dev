@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarBee Recommendation System - Technical Documentation</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1f2937;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.15);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --border: #374151;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --sidebar-width: 280px;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      width: var(--sidebar-width);
+      height: 100vh;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-header svg {
+      width: 28px;
+      height: 28px;
+      color: var(--accent);
+    }
+
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a5b4fc, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.025em;
+    }
+
+    .sidebar-nav {
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .nav-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 0.75rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background-color: var(--border);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background-color: var(--accent-glow);
+      color: var(--accent);
+      border-left: 3px solid var(--accent);
+    }
+
+    /* Main Content */
+    main {
+      margin-left: var(--sidebar-width);
+      padding: 3rem 4rem;
+      max-width: 1200px;
+      width: calc(100% - var(--sidebar-width));
+      flex-grow: 1;
+    }
+
+    /* Typography & Core Layout elements */
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 0;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-top: 3rem;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+      color: #cbd5e1;
+    }
+
+    h4 {
+      font-size: 1.1rem;
+      color: #94a3b8;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+      font-size: 1rem;
+    }
+
+    strong {
+      color: var(--text-primary);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      background-color: var(--bg-tertiary);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #f472b6;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    pre {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    pre code {
+      background-color: transparent;
+      padding: 0;
+      border: none;
+      color: #e2e8f0;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* Badges & Pill Containers */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .badge-accent {
+      background-color: var(--accent-glow);
+      color: var(--accent);
+    }
+
+    .badge-success {
+      background-color: var(--success-glow);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background-color: var(--warning-glow);
+      color: var(--warning);
+    }
+
+    /* Alerts and Note boxes */
+    .alert {
+      border-left: 4px solid var(--accent);
+      background-color: var(--bg-secondary);
+      padding: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .alert-success {
+      border-left-color: var(--success);
+      background-color: rgba(16, 185, 129, 0.03);
+    }
+
+    .alert-warning {
+      border-left-color: var(--warning);
+      background-color: rgba(245, 158, 11, 0.03);
+    }
+
+    /* Flex grids & lists */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Custom Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    th,
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Custom CSS Architecture Diagrams */
+    .diagram-container {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .flowchart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      min-width: 600px;
+    }
+
+    .flow-step {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      min-width: 220px;
+      text-align: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .flow-step::after {
+      content: "↓";
+      position: absolute;
+      bottom: -1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .flow-step:last-child::after {
+      display: none;
+    }
+
+    .flow-split {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+    }
+
+    .flow-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      flex: 1;
+      border: 1px dashed var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+
+    .flow-step.accent {
+      border-color: var(--accent);
+      background-color: var(--accent-glow);
+    }
+
+    .flow-step.success {
+      border-color: var(--success);
+      background-color: var(--success-glow);
+    }
+
+    /* Math Formulas */
+    .math-block {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .math-explanation {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+    }
+
+    /* Interactive Simulator */
+    .simulator {
+      background: linear-gradient(145deg, var(--bg-secondary), #131a28);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 0 20px 0 var(--accent-glow);
+    }
+
+    .simulator-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .simulator-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .sim-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sim-section h4 {
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.25rem;
+      margin-top: 0;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .input-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .input-group select,
+    .input-group input {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem;
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group select:focus,
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .sim-output {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .output-score {
+      text-align: center;
+      padding: 1.5rem;
+      background-color: var(--accent-glow);
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+    }
+
+    .output-score span.score-val {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      display: block;
+    }
+
+    .output-score span.score-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .breakdown-row span.label {
+      color: var(--text-secondary);
+    }
+
+    .breakdown-row span.val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigation Sidebar -->
+  <aside>
+    <div class="sidebar-header">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.62 48.62 0 0112 20.9c2.785 0 5.43-.825 7.64-2.352a60.43 60.43 0 00-.49-6.347M12 2.25l-10.05 4.5L12 11.25l.02-.01 9.98-4.49L12 2.25z"
+          stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M12 11.25v8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="sidebar-title">ScholarBee API</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-label">Overview</span>
+      <a href="#summary" class="nav-item active">Executive Summary</a>
+      <a href="#architecture" class="nav-item">System Architecture</a>
+      <a href="#models" class="nav-item">Data Models</a>
+      <a href="#endpoints" class="nav-item">API Endpoints</a>
+
+      <span class="nav-label">Core Scoring Logic</span>
+      <a href="#decision-tree" class="nav-item">Scoring Modes Tree</a>
+      <a href="#program-scoring" class="nav-item">Program Scoring Engine</a>
+      <a href="#uni-scoring" class="nav-item">University Scoring Engine</a>
+      <a href="#bayesian" class="nav-item">Bayesian Weight System</a>
+
+      <span class="nav-label">Taxonomy & Cache</span>
+      <a href="#knowledge-graph" class="nav-item">Knowledge Graph</a>
+      <a href="#caching" class="nav-item">Caching Layer & Perf</a>
+      <a href="#tracking" class="nav-item">Event Tracking</a>
+
+      <span class="nav-label">Interactive & Verification</span>
+      <a href="#simulator" class="nav-item">Live Score Simulator</a>
+      <a href="#config-reference" class="nav-item">Config Constants</a>
+      <a href="#test-cases" class="nav-item">Demo Test Cases</a>
+    </nav>
+  </aside>
+
+  <!-- Main Documentation Column -->
+  <main>
+    <section id="header-section">
+      <h1>ScholarBee Recommendation Engine</h1>
+      <p class="subtitle">A complete technical breakdown of the onboarding, behavioral, hybrid, and Bayesian scoring
+        implementation.</p>
+    </section>
+
+    <!-- 1. Executive Summary -->
+    <section id="summary">
+      <h2>1. Executive Summary</h2>
+      <p>
+        The ScholarBee Recommendation System is a personalized, state-of-the-art academic recommendation engine built
+        inside a NestJS environment. It provides targeted program (degree courses) and university recommendations by
+        blending demographic onboarding preferences, student behavior logs (such as page clicks, course favorites, and
+        applications), and global popularity analytics.
+      </p>
+      <p>
+        To handle cold-start scenarios, user fatigue, and dynamic shifts in student interest, the engine relies on a
+        <strong>Beta-Binomial Bayesian Weight Update</strong> model. Rather than keeping preference weights constant,
+        the system actively updates user weights in real-time as users browse, click, and interact.
+      </p>
+
+      <div class="alert alert-success">
+        <div class="alert-title">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round">
+            </path>
+          </svg>
+          Design Priorities Met
+        </div>
+        <ul>
+          <li><strong>No Hardcoded Filtering Noise:</strong> Silent dimensions like unimplemented search alignment or
+            dwell times are scored as 0 to maintain clean signals.</li>
+          <li><strong>MOU & Freshness Tiebreakers:</strong> Multiplicative boosts promote partner universities and
+            active deadlines without overriding academic match preferences.</li>
+          <li><strong>Fast-acting Hybrid Shifts:</strong> The behavioral event threshold is set to 1 so that the user's
+            very first click is immediately visual in their rankings.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. System Architecture -->
+    <section id="architecture">
+      <h2>2. Architecture Overview</h2>
+      <p>
+        The recommendation engine resides inside the <a
+          href="file:///d:/STUDY/Fiver/scholarbee-dev/scholarbee-dev/backend-api/src/recommendations">recommendations/</a>
+        module. It queries MongoDB for master data (Universities, Campuses, Addresses, Admissions, Programs, Program
+        Templates) and uses Redis as a high-performance cache.
+      </p>
+
+      <div class="diagram-container">
+        <div class="flowchart">
+          <div class="flow-step accent">
+            <strong>HTTP GET /recommendations</strong>
+            <br><small>Client request via recommendations.controller.ts</small>
+          </div>
+          <div class="flow-step">
+            <strong>Check Cache (Redis Gzip)</strong>
+            <br><small>recommendation-cache.service.ts</small>
+          </div>
+          <div class="flow-split">
+            <div class="flow-branch">
+              <div class="flow-step success">
+                <strong>Cache Hit</strong>
+                <br><small>Uncompress gzip & Return JSON instantly</small>
+              </div>
+            </div>
+            <div class="flow-branch">
+              <div class="flow-step">
+                <strong>Cache Miss / Invalidation</strong>
+                <br><small>Retrieve user context and event counts</small>
+              </div>
+              <div class="flow-step accent">
+                <strong>ScoringEngineService</strong>
+                <br><small>Determine mode & Run parallel pre-queries</small>
+              </div>
+              <div class="flow-step">
+                <strong>Compute & Sort Lists</strong>
+                <br><small>Apply onboarding, behavior, popularity, & boosts</small>
+              </div>
+              <div class="flow-step">
+                <strong>Compress and Write back</strong>
+                <br><small>Redis write (Gzip, 60s TTL)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Query Performance Audits</h3>
+      <p>
+        To avoid high-overhead in-memory mapping and full-database table scans, the engine runs optimized Mongoose
+        pipelines:
+      </p>
+      <ol>
+        <li><strong>Parallel Resolve Promises:</strong> Resolves active admissions deadlines, preferred cities, and
+          degree goals concurrently using `Promise.all` before fetching target programs.</li>
+        <li><strong>Read-only Lean Exectuions:</strong> Executes `.lean()` database queries, bypassing full Mongoose
+          document class hydration.</li>
+        <li><strong>Explicit Projections:</strong> Projections filter out heavy fields (e.g. descriptions, gallery
+          links, photos), querying only references needed for matching.</li>
+      </ol>
+    </section>
+
+    <!-- 3. Data Models -->
+    <section id="models">
+      <h2>3. Data Models</h2>
+
+      <h3>Onboarding Preferences</h3>
+      <p>
+        Demographic and academic parameters collected from the user during signup or onboarding:
+      </p>
+      <pre><code>interface OnboardingPreferences {
+  degree_goal: string;              // e.g. "Bachelors", "Masters", "PhD"
+  preferred_cities: string[];        // e.g. ["Lahore", "Islamabad"]
+  preferred_fields_of_study: string[]; // e.g. ["Computer Science", "Finance"]
+  semester_fee_range: {
+    min: number;
+    max: number;
+  };
+  previous_marks_range?: {
+    min_percent: number;
+    max_percent: number;
+  };
+}</code></pre>
+
+      <h3>Bayesian Weights Schema</h3>
+      <p>
+        Stored directly inside the Student document (under <code>bayesian_weights</code>) to track preference relevance:
+      </p>
+      <pre><code>interface BayesianWeightDimension {
+  alpha: number; // Positive reinforcement count (successes)
+  beta: number;  // Negative/neutral interaction count (failures)
+}
+
+interface WeightPriors {
+  degree_match: BayesianWeightDimension;
+  field_match: BayesianWeightDimension;
+  city_match: BayesianWeightDimension;
+  fee_match: BayesianWeightDimension;
+}</code></pre>
+
+      <h3>User Interaction Events Schema</h3>
+      <p>
+        Monitors student clicks, favorites, and applications:
+      </p>
+      <pre><code>const UserEventSchema = new Schema({
+  user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+  session_id: { type: String },
+  event_type: { type: String, enum: ['click', 'favorite', 'apply', 'ignore'] },
+  resource_type: { type: String, enum: ['admission_program', 'university'] },
+  resource_id: { type: Schema.Types.ObjectId },
+  // Decayed/Extracted properties for quick matching
+  field: { type: String },
+  city: { type: String },
+  degree_level: { type: String },
+  fee_bucket: { type: Number }, // 1: <100k, 2: 100-200k, 3: 200-300k, 4: >300k
+  created_at: { type: Date, default: Date.now }
+});</code></pre>
+    </section>
+
+    <!-- 4. API Endpoints -->
+    <section id="endpoints">
+      <h2>4. API Endpoints</h2>
+
+      <h3>1. Fetch Recommendations</h3>
+      <p>
+        Retrieves paginated recommendations for programs or universities.
+      </p>
+      <pre><code>GET /api/v1/recommendations?type=programs&page=1&limit=10
+GET /api/v1/recommendations?type=universities&page=1&limit=10
+
+Headers:
+Authorization: Bearer &lt;token&gt;</code></pre>
+
+      <h3>2. Track User Interaction Event</h3>
+      <p>
+        Tracks user behavior, invalidates relevant Redis caches, and recalculates Bayesian priors.
+      </p>
+      <pre><code>POST /api/v1/recommendations/events
+Payload:
+{
+  "event_type": "click", // click, favorite, apply, ignore
+  "resource_type": "admission_program", // admission_program, university
+  "resource_id": "6a1ca58b520cbc85dc51d387",
+  "metadata": {
+    "source": "search_results"
+  }
+}</code></pre>
+
+      <h3>3. Seed Recommendation Demo</h3>
+      <p>
+        Utility endpoint to quickly seed onboarding preferences and simulated clicks for a demo user.
+      </p>
+      <pre><code>POST /api/v1/recommendations/seed-demo</code></pre>
+    </section>
+
+    <!-- 5. Scoring Mode Decision Tree -->
+    <section id="decision-tree">
+      <h2>5. Scoring Mode Decision Tree</h2>
+      <p>
+        The engine identifies one of four scoring modes based on the availability of onboarding preferences and the
+        volume of behavioral event history.
+      </p>
+
+      <div class="diagram-container">
+        <div class="flowchart" style="min-width: unset;">
+          <div class="flow-step accent">
+            <strong>Check: Logged In & Has Onboarding?</strong>
+          </div>
+          <div class="flow-split">
+            <div class="flow-branch">
+              <span class="badge badge-accent">Yes</span>
+              <div class="flow-step">
+                <strong>Check: Total Events >= 1?</strong>
+              </div>
+              <div class="flow-split" style="gap: 1rem; width: 100%;">
+                <div class="flow-branch" style="padding: 0.5rem;">
+                  <span class="badge badge-success">Yes (>=1)</span>
+                  <div class="flow-step success">
+                    <strong>Hybrid Mode (Post-Threshold)</strong>
+                    <br><small>40% Onboarding / 60% Behavioral</small>
+                  </div>
+                </div>
+                <div class="flow-branch" style="padding: 0.5rem;">
+                  <span class="badge badge-warning">No (0)</span>
+                  <div class="flow-step accent">
+                    <strong>Hybrid Mode (Initial)</strong>
+                    <br><small>70% Onboarding / 30% Behavioral</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flow-branch">
+              <span class="badge">No</span>
+              <div class="flow-step">
+                <strong>Check: Logged In & Events >= 1?</strong>
+              </div>
+              <div class="flow-split" style="gap: 1rem; width: 100%;">
+                <div class="flow-branch" style="padding: 0.5rem;">
+                  <span class="badge badge-success">Yes</span>
+                  <div class="flow-step success">
+                    <strong>Behavioral Mode</strong>
+                    <br><small>90% Behavioral / 10% Popularity</small>
+                  </div>
+                </div>
+                <div class="flow-branch" style="padding: 0.5rem;">
+                  <span class="badge">No</span>
+                  <div class="flow-step">
+                    <strong>Trending Mode</strong>
+                    <br><small>Pure Global Popularity sorting</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        <strong>Note on Program vs University mode differentiation:</strong> For program recommendations, if the user
+        has onboarding preferences and 0 interaction logs, the scoring mode is set directly to <code>hybrid</code> (with
+        alpha=0.7 and beta=0.3) so that the first click immediately affects rankings. For university scoring, a
+        cold-start preference-only user matches <code>onboarding</code> mode.
+      </p>
+    </section>
+
+    <!-- 6. Program Scoring Engine -->
+    <section id="program-scoring">
+      <h2>6. Program Scoring Engine</h2>
+      <p>
+        Programs are scored out of a baseline range of [0.0, 1.0], scaled by boosts.
+      </p>
+
+      <div class="math-block">
+        Final Score = [(1.0 - PopWeight) * ( &alpha; * OnboardingScore + &beta; * BehavioralScore ) + PopWeight *
+        ProgramPopularity] * MOUBoost * FreshnessBoost
+      </div>
+
+      <h3>Score Formulas Breakdown</h3>
+
+      <h4>1. Onboarding Score (Max 1.0)</h4>
+      <p>
+        Sums matched preference parameters. The dimensions are weighted based on Bayesian priors (which default to
+        25/25/20/15 proportions scaled to sum to 0.85):
+      </p>
+      <div class="math-block">
+        OnboardingScore = (wDegree * MatchDegree) + (wField * FieldSim) + (wCity * MatchCity) + (wFee * MatchFee) + 0.10
+        * MatchEligibility + 0.05 * MatchTimeline
+      </div>
+      <ul>
+        <li><code>MatchDegree</code>: Binary match (1.0 if program's degree level fits, 0.0 otherwise).</li>
+        <li><code>FieldSim</code>: Numerical score (0.0 to 1.0) returned from the Knowledge Graph similarity mapping.
+        </li>
+        <li><code>MatchCity</code>: Binary match (1.0 if program campus city matches user preferred cities).</li>
+        <li><code>MatchFee</code>: Dynamic budget score (1.0 if program fee is within user's preferred min/max range,
+          0.5 if up to 20% over range, 0.0 if exceeded).</li>
+        <li><code>MatchEligibility / MatchTimeline</code>: Fixed values set to 1.0 placeholder matches until dynamic
+          indicators are implemented.</li>
+      </ul>
+
+      <h4>2. Behavioral Score (Max 1.0)</h4>
+      <p>
+        Weighted sum of individual interaction signals:
+      </p>
+      <div class="math-block">
+        BehavioralScore = 0.20 * (Clicks / MaxClicks) + 0.30 * MatchApplies + 0.20 * Favorited + 0.15 * SearchAlign +
+        0.15 * DwellTime
+      </div>
+      <ul>
+        <li><code>Clicks / MaxClicks</code>: Decayed interaction clicks relative to the user's most clicked program.
+          Clicks decay exponentially over a 30-day half-life.</li>
+        <li><code>MatchApplies</code>: Binary (1.0 if applied, 0.0 otherwise).</li>
+        <li><code>Favorited</code>: Decayed bookmark status (1.0 if favorited, 0.0 otherwise).</li>
+        <li><code>SearchAlign / DwellTime</code>: Hardcoded to 0 to prevent noise.</li>
+      </ul>
+
+      <h4>3. Program Popularity (Capped at 1.0)</h4>
+      <p>
+        Evaluates active popularity inside the trending logs:
+      </p>
+      <div class="math-block">
+        ProgramPopularity = Min( [ FavoritesCount + RedirectsCount + DecayedGlobalClicks ] / 10.0, 1.0 )
+      </div>
+      <p>
+        Global clicks include a 5x weight multiplier for application actions
+        (<code>APPLICATION_EVENT_POPULARITY_WEIGHT = 5.0</code>).
+      </p>
+
+      <h4>4. Multiplicative Boosts</h4>
+      <ul>
+        <li><strong>MOU Boost (1.03):</strong> ScholarBee verified campuses receive a 3% boost. It serves as a
+          tiebreaker for programs with similar academic fit.</li>
+        <li><strong>Freshness Boost (1.02):</strong> Programs with active deadlines receive a 2% boost to promote timely
+          applications.</li>
+      </ul>
+    </section>
+
+    <!-- 7. University Scoring Engine -->
+    <section id="uni-scoring">
+      <h2>7. University Scoring Engine</h2>
+      <p>
+        University scoring follows a simplified structure since Bayesian updates are targeted exclusively to
+        program-related choices.
+      </p>
+
+      <h3>Score Formulas Breakdown</h3>
+
+      <h4>1. Onboarding Score (Max 1.0)</h4>
+      <p>
+        A direct, non-Bayesian evaluation based on location and degree alignments:
+      </p>
+      <div class="math-block">
+        OnboardingScore = 0.40 * MatchCity + 0.30 * MaxFieldSimilarity + 0.30 * Baseline
+      </div>
+      <ul>
+        <li><code>MatchCity</code>: 1.0 if the university has a campus in one of the user's preferred cities, 0.0
+          otherwise.</li>
+        <li><code>MaxFieldSimilarity</code>: Highest similarity score (0.0 to 1.0) between any preferred field of study
+          and any course template offered by the university.</li>
+        <li><code>Baseline</code>: A static 0.30 baseline score applied to all universities.</li>
+      </ul>
+
+      <h4>2. Behavioral Score (Max 1.0)</h4>
+      <p>
+        Reflects interactions with the university listing page or its associated programs:
+      </p>
+      <div class="math-block">
+        BehavioralScore = 0.50 * Clicks + 0.50 * Applies
+      </div>
+
+      <h4>3. University Popularity (Capped at 1.0)</h4>
+      <div class="math-block">
+        UniversityPopularity = Min( DecayedGlobalClicks / 10.0, 1.0 )
+      </div>
+    </section>
+
+    <!-- 8. Bayesian Weight System -->
+    <section id="bayesian">
+      <h2>8. Bayesian Weight System</h2>
+      <p>
+        ScholarBee uses a <strong>Beta-Binomial Bayesian framework</strong> to continuously update onboarding preference
+        weights.
+      </p>
+
+      <h3>Mathematical Rationale</h3>
+      <p>
+        For each preference dimension (Degree, Field, City, Fee), we represent the user's focus on that dimension as a
+        Beta probability distribution:
+      </p>
+      <div class="math-block">
+        &theta;<sub>d</sub> ~ Beta(&alpha;<sub>d</sub>, &beta;<sub>d</sub>)
+      </div>
+      <p>
+        Where <code>&alpha;</code> represents successes (clicking programs matching the preference) and
+        <code>&beta;</code> represents failures/indifference (clicking programs that do not match the preference).
+      </p>
+
+      <h3>Weight Update Rule</h3>
+      <p>
+        On every user event tracked, we check if the interacted program matches the user's preferences:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>User Interaction (Action Strength)</th>
+            <th>Match Result</th>
+            <th>Update Applied</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2"><strong>Positive Interaction:</strong><br>• Apply (strength = 3)<br>• Favorite (strength =
+              2)<br>• Click (strength = 1)</td>
+            <td>Matches preference dimension (Match = 1)</td>
+            <td><code>&alpha; += 1.0 * strength</code></td>
+          </tr>
+          <tr>
+            <td>Does not match preference (Match = 0)</td>
+            <td><code>&beta; += 1.0 * strength</code></td>
+          </tr>
+          <tr>
+            <td rowspan="2"><strong>Negative Interaction:</strong><br>• Ignore (strength = 0.5)</td>
+            <td>Matches preference dimension (Match = 1)</td>
+            <td><code>&beta; += 1.0 * strength</code></td>
+          </tr>
+          <tr>
+            <td>Does not match preference (Match = 0)</td>
+            <td><code>&alpha; += 1.0 * strength</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Weight Normalization</h3>
+      <p>
+        When retrieving weights, the engine computes the mathematical mean of each Beta distribution
+        (<code>&alpha; / (&alpha; + &beta;)</code>), and then normalizes them so they sum to 1.0. This normalized value
+        is multiplied by 0.85 to leave 15% reserved for fixed criteria:
+      </p>
+      <div class="math-block">
+        Mean<sub>d</sub> = &alpha;<sub>d</sub> / ( &alpha;<sub>d</sub> + &beta;<sub>d</sub> )
+        <br><br>
+        wDegree = [ Mean<sub>degree</sub> / &sum;(Means) ] * 0.85
+      </div>
+    </section>
+
+    <!-- 9. Knowledge Graph & Taxonomy -->
+    <section id="knowledge-graph">
+      <h2>9. Knowledge Graph & Taxonomy</h2>
+      <p>
+        The Knowledge Graph performs string cleanup, maps spelling variants to canonical categories, and calculates
+        cross-disciplinary similarities.
+      </p>
+
+      <h3>1. String Normalization</h3>
+      <p>
+        Cleans field inputs by removing dots, brackets, hyphens, and multi-spaces, converting abbreviations (e.g.
+        <code>BS CS</code>, <code>BSCS</code>) to a canonical snake_case key (<code>computer_science</code>).
+      </p>
+
+      <h3>2. 2-Hop Similarity Propagation</h3>
+      <p>
+        Direct taxonomic links are pre-seeded in code (e.g., Computer Science to Software Engineering = 0.90). To
+        capture secondary relationships, the graph runs a <strong>two-hop transitive mapping</strong> with a 30% penalty
+        (0.7 coefficient):
+      </p>
+      <div class="math-block">
+        Sim(A, C) = Max( DirectSim(A, C), DirectSim(A, B) * DirectSim(B, C) * 0.7 )
+      </div>
+
+      <p><strong>Example Path:</strong></p>
+      <ul>
+        <li><code>Artificial Intelligence</code> &harr; <code>Computer Science</code> (Direct = 0.85)</li>
+        <li><code>Computer Science &harr; Electrical Engineering</code> (Direct = 0.60)</li>
+        <li>Computed 2-Hop link: <code>Artificial Intelligence</code> &harr; <code>Electrical Engineering</code> =
+          <code>0.85 * 0.60 * 0.7 = 0.357</code></li>
+      </ul>
+    </section>
+
+    <!-- 10. Caching Layer -->
+    <section id="caching">
+      <h2>10. Caching Layer & Performance Optimization</h2>
+      <p>
+        To prevent heavy database queries on high-traffic pages, recommendation lists are aggressively cached.
+      </p>
+
+      <div class="feature-grid">
+        <div class="card">
+          <div class="card-title">
+            <span>Cache Compression</span>
+            <span class="badge badge-accent">Gzip</span>
+          </div>
+          <p>
+            Recommendation JSON responses are serialized and compressed using <code>zlib.gzip</code> before storage in
+            Redis, reducing payload sizes by up to 90% and saving network bandwidth.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>Cache Time-To-Live (TTL)</span>
+            <span class="badge badge-warning">60 Seconds</span>
+          </div>
+          <p>
+            Cached lists expire after 60 seconds. This maintains responsiveness for trending program statistics while
+            ensuring database reads stay minimal.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>Real-time Invalidation</span>
+            <span class="badge badge-success">Reactive</span>
+          </div>
+          <p>
+            Any tracked user event immediately invalidates that user's Redis caches and triggers a fire-and-forget
+            background computation, seeding the cache before the student reloads.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. Event Tracking -->
+    <section id="tracking">
+      <h2>11. Event Tracking Flow</h2>
+      <p>
+        When a user event is logged:
+      </p>
+      <div class="diagram-container">
+        <div class="flowchart">
+          <div class="flow-step accent">
+            <strong>Track Event Endpoint Fired</strong>
+          </div>
+          <div class="flow-step">
+            <strong>Identify Resource Properties</strong>
+            <br><small>Resolve target program's city, degree, field and fee bucket</small>
+          </div>
+          <div class="flow-step">
+            <strong>Apply Bayesian Update</strong>
+            <br><small>Adjust student's alpha and beta values based on match metrics</small>
+          </div>
+          <div class="flow-step success">
+            <strong>Invalidate Caches & Trigger Background Recalculation</strong>
+            <br><small>Clear user cache and calculate fresh lists asynchronously</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Interactive Score Simulator -->
+    <section id="simulator">
+      <div class="simulator">
+        <div class="simulator-title">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M10 21h4a2 2 0 002-2V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v14a2 2 0 002 2z"
+              stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          Interactive Recommendation Score Simulator
+        </div>
+
+        <p style="color: var(--text-primary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Tune user preferences, target course attributes, and interaction behavior below to simulate the exact
+          mathematical scoring and ranking in real-time.
+        </p>
+
+        <div class="simulator-grid">
+          <!-- User Preferences Panel -->
+          <div class="sim-section">
+            <h4>1. User Onboarding Preferences</h4>
+
+            <div class="input-group">
+              <label>Degree Goal</label>
+              <select id="user-degree">
+                <option value="Bachelors">Bachelors</option>
+                <option value="Masters">Masters</option>
+                <option value="PhD">PhD</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Preferred Field of Study</label>
+              <select id="user-field">
+                <option value="computer_science">Computer Science</option>
+                <option value="software_engineering">Software Engineering</option>
+                <option value="data_science">Data Science</option>
+                <option value="finance">Finance</option>
+                <option value="accounting">Accounting</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Preferred Cities</label>
+              <select id="user-city">
+                <option value="lahore">Lahore</option>
+                <option value="islamabad">Islamabad</option>
+                <option value="karachi">Karachi</option>
+                <option value="multan">Multan</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Semester Fee Budget Limit (PKR)</label>
+              <input type="number" id="user-fee-limit" value="300000">
+            </div>
+          </div>
+
+          <!-- Target Course Panel -->
+          <div class="sim-section">
+            <h4>2. Target Course Attributes</h4>
+
+            <div class="input-group">
+              <label>Degree Level</label>
+              <select id="course-degree">
+                <option value="Bachelors">Bachelors</option>
+                <option value="Masters">Masters</option>
+                <option value="PhD">PhD</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Field of Study</label>
+              <select id="course-field">
+                <option value="computer_science">Computer Science</option>
+                <option value="software_engineering">Software Engineering</option>
+                <option value="data_science">Data Science</option>
+                <option value="finance">Finance</option>
+                <option value="accounting">Accounting</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Campus City</label>
+              <select id="course-city">
+                <option value="lahore">Lahore</option>
+                <option value="islamabad">Islamabad</option>
+                <option value="karachi">Karachi</option>
+                <option value="multan">Multan</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Tuition Fee (PKR)</label>
+              <input type="number" id="course-fee" value="250000">
+            </div>
+
+            <div class="input-group" style="flex-direction: row; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+              <input type="checkbox" id="course-verified" checked>
+              <label for="course-verified">ScholarBee Verified Campus (MOU Boost)</label>
+            </div>
+
+            <div class="input-group" style="flex-direction: row; gap: 0.5rem; align-items: center;">
+              <input type="checkbox" id="course-active" checked>
+              <label for="course-active">Active Deadline (Freshness Boost)</label>
+            </div>
+          </div>
+
+          <!-- Interaction Profile Panel -->
+          <div class="sim-section">
+            <h4>3. Interactions & Popularity</h4>
+
+            <div class="input-group">
+              <label>User Clicks on this Course</label>
+              <input type="number" id="user-clicks" min="0" value="0">
+            </div>
+
+            <div class="input-group" style="flex-direction: row; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+              <input type="checkbox" id="user-applied">
+              <label for="user-applied">User Applied to this Course</label>
+            </div>
+
+            <div class="input-group" style="flex-direction: row; gap: 0.5rem; align-items: center;">
+              <input type="checkbox" id="user-favorited">
+              <label for="user-favorited">User Favorited this Course</label>
+            </div>
+
+            <div class="input-group">
+              <label>Global Popularity (Decayed Clicks)</label>
+              <input type="number" id="global-popularity" min="0" value="18">
+            </div>
+
+            <div class="input-group">
+              <label>Total User Interaction Logs (Switch Threshold)</label>
+              <input type="number" id="total-logs" min="0" value="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="sim-grid-output" style="margin-top: 2rem;">
+          <div class="sim-output">
+            <div class="output-score">
+              <span class="score-val" id="final-score-val">0.77</span>
+              <span class="score-label">Final Relevance Score</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div class="breakdown-row">
+                <span class="label">Calculated Mode</span>
+                <span class="val" id="out-mode">HYBRID</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Onboarding Component Score</span>
+                <span class="val" id="out-onboarding">1.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Behavioral Component Score</span>
+                <span class="val" id="out-behavioral">0.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Popularity Component Score</span>
+                <span class="val" id="out-popularity">1.00</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="label">Applied Boost Multipliers</span>
+                <span class="val" id="out-boosts">MOU (1.03) * Freshness (1.02)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. Configuration Reference Table -->
+    <section id="config-reference">
+      <h2>13. Configuration Reference Table</h2>
+      <p>
+        The scoring engine utilizes values exported from <a
+          href="file:///d:/STUDY/Fiver/scholarbee-dev/scholarbee-dev/backend-api/src/recommendations/constants/scoring.constants.ts">scoring.constants.ts</a>.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Constant Name</th>
+            <th>Default Value</th>
+            <th>Type</th>
+            <th>Logic & Tuning Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>INITIAL_ONBOARDING_WEIGHT_ALPHA</code></td>
+            <td><code>0.7</code></td>
+            <td>Number</td>
+            <td>Priority weight for user demographic preferences when the interaction history is low. Ensures high
+              accuracy early on.</td>
+          </tr>
+          <tr>
+            <td><code>INITIAL_BEHAVIORAL_WEIGHT_BETA</code></td>
+            <td><code>0.3</code></td>
+            <td>Number</td>
+            <td>Behavioral priority weight during cold-start. High enough to surface immediate clicks, but low enough
+              not to overshadow preference matches.</td>
+          </tr>
+          <tr>
+            <td><code>POST_THRESHOLD_ONBOARDING_WEIGHT_ALPHA</code></td>
+            <td><code>0.4</code></td>
+            <td>Number</td>
+            <td>Onboarding weight after the student has browsed enough. Shifts focus towards behavioral interests.</td>
+          </tr>
+          <tr>
+            <td><code>POST_THRESHOLD_BEHAVIORAL_WEIGHT_BETA</code></td>
+            <td><code>0.6</code></td>
+            <td>Number</td>
+            <td>Behavioral weight after the student has browsed enough. Interaction history now takes precedence.</td>
+          </tr>
+          <tr>
+            <td><code>BEHAVIORAL_EVENT_THRESHOLD</code></td>
+            <td><code>1</code></td>
+            <td>Number</td>
+            <td>The event volume threshold required to transition weights from Initial to Post-Threshold values. Set to
+              1 for quick adaptation.</td>
+          </tr>
+          <tr>
+            <td><code>MOU_BOOST</code></td>
+            <td><code>1.03</code></td>
+            <td>Number</td>
+            <td>Verified partner campuses receive a 3% boost. Operates as a tiebreaker for similar ranking matches.</td>
+          </tr>
+          <tr>
+            <td><code>FRESHNESS_BOOST</code></td>
+            <td><code>1.02</code></td>
+            <td>Number</td>
+            <td>Active application deadlines receive a 2% boost to keep recommended items active.</td>
+          </tr>
+          <tr>
+            <td><code>HALF_LIFE_DAYS</code></td>
+            <td><code>30</code></td>
+            <td>Number</td>
+            <td>Days after which a user interaction's score decays by half. Prevents outdated clicks from skewing
+              current preferences.</td>
+          </tr>
+          <tr>
+            <td><code>ONBOARDING_POPULARITY_WEIGHT</code></td>
+            <td><code>0.2</code></td>
+            <td>Number</td>
+            <td>Percentage of final score determined by global program popularity in onboarding mode. Sets popular
+              options as default.</td>
+          </tr>
+          <tr>
+            <td><code>APPLICATION_EVENT_POPULARITY_WEIGHT</code></td>
+            <td><code>5.0</code></td>
+            <td>Number</td>
+            <td>Multiplying factor for application events relative to clicks. Strongly weighs courses that students
+              actually apply to.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 14. Demo Test Cases -->
+    <section id="test-cases">
+      <h2>14. Demo Test Cases Walkthrough</h2>
+      <p>
+        The system behavior can be tested using the following test scenarios:
+      </p>
+
+      <div class="feature-grid">
+        <div class="card">
+          <div class="card-title">
+            <span>Case 1: Anonymous / Cold-Start</span>
+            <span class="badge">Trending Mode</span>
+          </div>
+          <p>
+            <strong>Setup:</strong> Non-authenticated user or logged-in student with no onboarding preferences and 0
+            event logs.<br>
+            <strong>Result:</strong> Scoring engine defaults to <code>trending</code> mode, ordering courses strictly by
+            global popularity (highest decayed clicks + favorites).
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Case 2: Pure Onboarding</span>
+            <span class="badge badge-accent">Onboarding Mode</span>
+          </div>
+          <p>
+            <strong>Setup:</strong> Student has defined preferences (e.g. Islamabad, Bachelors, CS) but 0 interaction
+            events.<br>
+            <strong>Result:</strong> Scoring defaults to <code>onboarding</code> (or initial hybrid with 0 behavior
+            score), placing preferred courses first.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Case 3: Single-Click Shift</span>
+            <span class="badge badge-success">Initial Hybrid</span>
+          </div>
+          <p>
+            <strong>Setup:</strong> Onboarded user performs exactly 1 click on a matching program.<br>
+            <strong>Result:</strong> The event count matches the threshold (1), activating initial hybrid weights (70%
+            onboarding, 30% behavioral) so the clicked course immediately rises in relevance.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Case 4: Behavioral Dominated</span>
+            <span class="badge badge-success">Post-Threshold Hybrid</span>
+          </div>
+          <p>
+            <strong>Setup:</strong> User has many interactions logged.<br>
+            <strong>Result:</strong> Engine shifts weights to 40% Onboarding / 60% Behavioral. Recommendations align
+            with browse history over original preferences.
+          </p>
+        </div>
+      </div>
+
+      <div class="card"
+        style="margin-top: 1.5rem; border-color: var(--success); background-color: rgba(16, 185, 129, 0.02);">
+        <div class="card-title" style="color: var(--success);">
+          <span>Case 5: The "5 Cities" Onboarding Test (Lahore Leads BSCS Top Placement)</span>
+          <span class="badge badge-success">Hybrid Mode</span>
+        </div>
+        <p>
+          <strong>Preferences Set:</strong> Preferred Cities:
+          <code>["Karachi", "Islamabad", "Lahore", "Rawalpindi", "Multan"]</code> | Degree Goal:
+          <code>"Bachelors"</code> | Preferred Fields: <code>["Computer Science"]</code> | Semester Budget:
+          <code>150,000 - 300,000 PKR</code>.
+        </p>
+        <p style="margin-top: 0.5rem;">
+          <strong>Why Lahore Leads University BSCS ranks #1 on top:</strong>
+        </p>
+        <ol
+          style="margin-left: 1.5rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; color: var(--text-secondary); font-size: 0.95rem;">
+          <li><strong>Perfect Preferences Fit:</strong> BSCS at Lahore Leads satisfies all onboarding conditions
+            (Bachelors, CS, Lahore, fee falls within budget). This returns a maximum <code>OnboardingScore = 1.0</code>.
+          </li>
+          <li><strong>Verified Partner Campus Boost:</strong> Lahore Leads is a ScholarBee verified partner campus. It
+            receives the <code>MOU_BOOST = 1.03</code>.</li>
+          <li><strong>Global Trending Popularity:</strong> The program has a recorded 18 global decayed clicks,
+            generating the maximum popularity score: <code>f_program_popularity = 1.0</code>.</li>
+          <li><strong>The Math Breakdown:</strong>
+            <br>
+            <code>Score = ((1.0 - 0.1) * (0.7 * 1.0 [Onboarding] + 0.3 * 0.0 [Behavioral]) + 0.1 * 1.0 [Popularity]) * 1.03 [MOU] * 1.02 [Freshness]</code>
+            <br>
+            <code>Score = (0.63 + 0.10) * 1.0506 = 0.73 * 1.0506 = <strong>0.767</strong></code>
+          </li>
+          <li><strong>Comparison:</strong> A matching program at a non-partner university with no global clicks achieves
+            a score of <code>(0.63 + 0) * 1.02 = <strong>0.643</strong></code>. The combination of verified status and
+            popularity places Lahore Leads on top.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <!-- Script block for the simulator -->
+  <script>
+    // Precomputed Knowledge Graph mock matrix matching taxonomy.ts
+    const SIM_MAP = {
+      computer_science: { computer_science: 1.0, software_engineering: 0.9, data_science: 0.8, finance: 0.0, accounting: 0.0 },
+      software_engineering: { computer_science: 0.9, software_engineering: 1.0, data_science: 0.75, finance: 0.0, accounting: 0.0 },
+      data_science: { computer_science: 0.8, software_engineering: 0.75, data_science: 1.0, finance: 0.0, accounting: 0.0 },
+      finance: { computer_science: 0.0, software_engineering: 0.0, data_science: 0.0, finance: 1.0, accounting: 0.85 },
+      accounting: { computer_science: 0.0, software_engineering: 0.0, data_science: 0.0, finance: 0.85, accounting: 1.0 }
+    };
+
+    function calculateScore() {
+      // Inputs
+      const userDegree = document.getElementById('user-degree').value;
+      const userField = document.getElementById('user-field').value;
+      const userCity = document.getElementById('user-city').value;
+      const userFeeLimit = parseFloat(document.getElementById('user-fee-limit').value) || 0;
+
+      const courseDegree = document.getElementById('course-degree').value;
+      const courseField = document.getElementById('course-field').value;
+      const courseCity = document.getElementById('course-city').value;
+      const courseFee = parseFloat(document.getElementById('course-fee').value) || 0;
+
+      const isVerified = document.getElementById('course-verified').checked;
+      const isActive = document.getElementById('course-active').checked;
+
+      const userClicks = parseInt(document.getElementById('user-clicks').value) || 0;
+      const userApplied = document.getElementById('user-applied').checked;
+      const userFavorited = document.getElementById('user-favorited').checked;
+
+      const globalClicks = parseFloat(document.getElementById('global-popularity').value) || 0;
+      const totalLogs = parseInt(document.getElementById('total-logs').value) || 0;
+
+      // 1. Determine Mode & Blending weights
+      const hasOnboarding = true; // Hardcoded in simulator for preference demonstration
+      const threshold = 1;
+      let mode = 'TRENDING';
+      let alpha = 0.7;
+      let beta = 0.3;
+      let popWeight = 0.1;
+
+      if (totalLogs >= threshold) {
+        alpha = 0.4;
+        beta = 0.6;
+        mode = 'HYBRID (POST-THRESHOLD)';
+      } else {
+        alpha = 0.7;
+        beta = 0.3;
+        mode = 'HYBRID (INITIAL)';
+      }
+
+      // 2. Onboarding Score Components (Default normalized: 0.25, 0.25, 0.20, 0.15 + 0.10 + 0.05)
+      const wDegree = 0.25;
+      const wField = 0.25;
+      const wCity = 0.20;
+      const wFee = 0.15;
+      const wEligibility = 0.10;
+      const wTimeline = 0.05;
+
+      const matchDegree = (userDegree === courseDegree) ? 1.0 : 0.0;
+
+      // Get similarity from precomputed map
+      let fieldSim = 0.0;
+      if (SIM_MAP[userField] && SIM_MAP[userField][courseField]) {
+        fieldSim = SIM_MAP[userField][courseField];
+      }
+
+      const matchCity = (userCity === courseCity) ? 1.0 : 0.0;
+
+      let matchFee = 0.0;
+      if (courseFee <= userFeeLimit) {
+        matchFee = 1.0;
+      } else if (courseFee <= userFeeLimit * 1.2) {
+        matchFee = 0.5;
+      }
+
+      const onboardingScore = (wDegree * matchDegree) + (wField * fieldSim) + (wCity * matchCity) + (wFee * matchFee) + wEligibility + wTimeline;
+
+      // 3. Behavioral Score Components
+      const wClicks = 0.20;
+      const wApplies = 0.30;
+      const wFavorites = 0.20;
+
+      // Assume max clicks is max of current click count or 1 for normalization
+      const maxClicks = Math.max(1, userClicks);
+      const normalizedClicks = userClicks / maxClicks;
+
+      const behaviorScore = (wClicks * normalizedClicks) + (wApplies * (userApplied ? 1.0 : 0.0)) + (wFavorites * (userFavorited ? 1.0 : 0.0));
+
+      // 4. Popularity
+      const popScore = Math.min((globalClicks + (userFavorited ? 1.0 : 0.0)) / 10.0, 1.0);
+
+      // 5. Blended Score
+      let finalScore = ((1.0 - popWeight) * (alpha * onboardingScore + beta * behaviorScore) + popWeight * popScore);
+
+      // 6. Boosts
+      const mouBoost = isVerified ? 1.03 : 1.0;
+      const freshnessBoost = isActive ? 1.02 : 1.0;
+
+      finalScore = finalScore * mouBoost * freshnessBoost;
+
+      // Output Results
+      document.getElementById('final-score-val').innerText = finalScore.toFixed(3);
+      document.getElementById('out-mode').innerText = mode;
+      document.getElementById('out-onboarding').innerText = onboardingScore.toFixed(3);
+      document.getElementById('out-behavioral').innerText = behaviorScore.toFixed(3);
+      document.getElementById('out-popularity').innerText = popScore.toFixed(3);
+      document.getElementById('out-boosts').innerText = `MOU (${mouBoost}) * Freshness (${freshnessBoost})`;
+    }
+
+    // Bind event listeners to input elements
+    const inputs = document.querySelectorAll('.simulator input, .simulator select');
+    inputs.forEach(input => {
+      input.addEventListener('input', calculateScore);
+    });
+
+    // Run initial calculation
+    calculateScore();
+  </script>
+</body>
+
+</html>

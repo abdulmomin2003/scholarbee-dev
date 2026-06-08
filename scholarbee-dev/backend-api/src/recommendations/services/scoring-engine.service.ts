@@ -113,15 +113,19 @@ export class ScoringEngineService {
 
     // If preferred cities were set, find campuses in those cities
     let campusFilter: any = {};
-    if (pref?.preferred_cities && pref.preferred_cities.length > 0 && matchingAddresses.length > 0) {
-      const addressIds = matchingAddresses.map((addr) => addr._id);
-      const matchingCampuses = await this.campusModel
-        .find({ address_id: { $in: addressIds } })
-        .select('_id')
-        .lean()
-        .exec();
-      const campusIds = matchingCampuses.map((c) => c._id);
-      campusFilter = { campus_id: { $in: campusIds } };
+    if (pref?.preferred_cities && pref.preferred_cities.length > 0) {
+      if (matchingAddresses.length > 0) {
+        const addressIds = matchingAddresses.map((addr) => addr._id);
+        const matchingCampuses = await this.campusModel
+          .find({ address_id: { $in: addressIds } })
+          .select('_id')
+          .lean()
+          .exec();
+        const campusIds = matchingCampuses.map((c) => c._id);
+        campusFilter = { campus_id: { $in: campusIds } };
+      } else {
+        campusFilter = { campus_id: { $in: [] } };
+      }
     }
 
     // Find programs matching template and campus filters
@@ -150,16 +154,15 @@ export class ScoringEngineService {
       admission: { $in: activeAdmissionIds },
     };
 
-    // Apply program ID filters (soft city match / hard degree match)
+    // Apply program ID filters (hard city match / hard degree match)
     if (programIds !== null) {
       if (programIds.length > 0) {
         admissionProgramQuery.program = { $in: programIds };
       } else {
         // Mismatch yielded 0 program IDs.
-        // If preferred cities was the only filter, skip it to avoid empty results (soft filter requirement).
-        // If degree goal was the filter, we must keep the filter (degree is a hard pre-filter).
-        if (pref?.degree_goal) {
-          admissionProgramQuery.program = { $in: [] }; // force empty results since degree didn't match
+        // If preferred cities or degree goal was set, we must force empty results (hard filter).
+        if (pref?.degree_goal || (pref?.preferred_cities && pref.preferred_cities.length > 0)) {
+          admissionProgramQuery.program = { $in: [] }; // force empty results
         }
       }
     }
@@ -226,9 +229,12 @@ export class ScoringEngineService {
       // Alpha stays high (0.7) so onboarding preferences still dominate, but beta (0.3)
       // ensures clicks are not completely invisible.
       scoringMode = 'hybrid';
-    } else if (user) {
-      // Logged-in user with no onboarding preferences — pure behavioral
+    } else if (user && events.length > 0) {
+      // Logged-in user with no onboarding preferences but has some interaction history
       scoringMode = 'behavioral';
+    } else {
+      // No onboarding and no events (anonymous user or cold-start logged-in user)
+      scoringMode = 'trending';
     }
 
     // Build user behavior profile indices for faster matching with 30-day half-life decay
@@ -252,6 +258,45 @@ export class ScoringEngineService {
         favoriteWeightMap.set(resourceIdStr, Math.max(favoriteWeightMap.get(resourceIdStr) || 0, decayFactor));
       } else if (event.event_type === UserRecommendationEventType.APPLY) {
         appliedSet.add(resourceIdStr);
+      }
+    }
+
+    // Build global click counts for actual trending/popularity score
+    const globalClickCountMap = new Map<string, number>();
+    if (user) {
+      let globalClickEvents: any[] = [];
+      if (typeof this.userEventModel.find === 'function') {
+        globalClickEvents = await this.userEventModel
+          .find({
+            event_type: { $in: [UserRecommendationEventType.CLICK, UserRecommendationEventType.APPLY] },
+            resource_type: 'admission_program',
+          })
+          .sort({ created_at: -1 })
+          .limit(5000)
+          .lean()
+          .exec();
+      }
+      for (const event of globalClickEvents) {
+        const resourceIdStr = event.resource_id.toString();
+        const eventTime = new Date(event.created_at || now).getTime();
+        const ageMs = Math.max(0, nowTime - eventTime);
+        const decayFactor = Math.pow(2, -ageMs / halfLifeMs);
+        const weight = event.event_type === UserRecommendationEventType.APPLY ? (config.APPLICATION_EVENT_POPULARITY_WEIGHT ?? 5.0) : 1.0;
+
+        globalClickCountMap.set(resourceIdStr, (globalClickCountMap.get(resourceIdStr) || 0) + weight * decayFactor);
+      }
+    } else {
+      // For anonymous users, events parameter contains global events
+      for (const event of events) {
+        if (event.event_type === UserRecommendationEventType.CLICK || event.event_type === UserRecommendationEventType.APPLY) {
+          const resourceIdStr = event.resource_id.toString();
+          const eventTime = new Date(event.created_at || now).getTime();
+          const ageMs = Math.max(0, nowTime - eventTime);
+          const decayFactor = Math.pow(2, -ageMs / halfLifeMs);
+          const weight = event.event_type === UserRecommendationEventType.APPLY ? (config.APPLICATION_EVENT_POPULARITY_WEIGHT ?? 5.0) : 1.0;
+
+          globalClickCountMap.set(resourceIdStr, (globalClickCountMap.get(resourceIdStr) || 0) + weight * decayFactor);
+        }
       }
     }
 
@@ -289,6 +334,14 @@ export class ScoringEngineService {
       const programObj: any = ap.program;
       if (!programObj || !programObj.template || !programObj.campus_id) {
         continue; // Skip malformed documents
+      }
+
+      // Filter out programs not receiving applications (either program level false or inherited parent admission level false)
+      const progRA = ap.receiving_applications || 'inherit';
+      const admRA = (ap.admission as any)?.receiving_applications;
+      const isClosed = progRA === 'false' || (progRA === 'inherit' && admRA === false);
+      if (isClosed) {
+        continue; // Skip closed programs
       }
 
       const template = programObj.template;
@@ -444,21 +497,33 @@ export class ScoringEngineService {
 
       // Extract remaining features
       f_field_similarity = maxSimilarity;
-      const popularity = (ap.favouriteBy?.length || 0) + (ap.redirected_students?.length || 0);
-      const f_program_popularity = Math.min(popularity / 10.0, 1.0);
       const clicks = clickCountMap.get(apIdStr) || 0;
+      const globalClicks = globalClickCountMap.get(apIdStr) || 0;
+      const popularity = (ap.favouriteBy?.length || 0) + (ap.redirected_students?.length || 0) + globalClicks;
+      const f_program_popularity = Math.min(popularity / 10.0, 1.0);
 
       // Combine
       let finalScore = 0;
       if ((scoringMode as string) === 'onboarding') {
-        finalScore = onboardingScore * mouBoost * freshnessBoost;
+        const popWeight = config.ONBOARDING_POPULARITY_WEIGHT ?? 0.2;
+        finalScore = ((1.0 - popWeight) * onboardingScore + popWeight * f_program_popularity) * mouBoost * freshnessBoost;
+        if (popularity > 0) {
+          matchReasons.push('Popular program');
+        }
       } else if (scoringMode === 'behavioral') {
-        finalScore = behavioralScore * mouBoost * freshnessBoost;
+        const popWeight = config.BEHAVIORAL_POPULARITY_WEIGHT ?? 0.1;
+        finalScore = ((1.0 - popWeight) * behavioralScore + popWeight * f_program_popularity) * mouBoost * freshnessBoost;
+        if (popularity > 0) {
+          matchReasons.push('Popular program');
+        }
       } else if (scoringMode === 'hybrid') {
-        finalScore = (alpha * onboardingScore + beta * behavioralScore) * mouBoost * freshnessBoost;
+        const popWeight = config.HYBRID_POPULARITY_WEIGHT ?? 0.1;
+        finalScore = ((1.0 - popWeight) * (alpha * onboardingScore + beta * behavioralScore) + popWeight * f_program_popularity) * mouBoost * freshnessBoost;
+        if (popularity > 0) {
+          matchReasons.push('Popular program');
+        }
       } else {
-        const popularity = (ap.favouriteBy?.length || 0) + (ap.redirected_students?.length || 0) + clicks;
-        // Do not cap popularity, so that a program with 10 clicks beats one with 5 clicks
+        // Pure trending fallback (do not cap popularity so that 10 clicks beats 5 clicks)
         finalScore = popularity * mouBoost * freshnessBoost;
         if (popularity > 0) {
           matchReasons.push('Popular program');
@@ -545,8 +610,9 @@ export class ScoringEngineService {
     applications: any[],
   ): Promise<IRecommendedUniversityResponse[]> {
     const pref = user?.onboarding_preferences;
+    const now = new Date();
 
-    // 1. Fetch matching address IDs for soft city filter
+    // 1. Fetch matching address IDs for hard city filter
     let addressIds: any[] = [];
     if (pref?.preferred_cities && pref.preferred_cities.length > 0) {
       const matchingAddresses = await this.addressModel
@@ -559,7 +625,7 @@ export class ScoringEngineService {
 
     // 2. Fetch all universities matching the address filter (if city was set)
     const uniQuery: any = {};
-    if (addressIds.length > 0) {
+    if (pref?.preferred_cities && pref.preferred_cities.length > 0) {
       uniQuery.address_id = { $in: addressIds };
     }
 
@@ -569,16 +635,6 @@ export class ScoringEngineService {
       .populate('address_id', '_id city state country')
       .lean()
       .exec();
-
-    // Soft filter bypass: if city filter yielded 0 universities, fetch all universities
-    if (universities.length === 0 && pref?.preferred_cities && pref.preferred_cities.length > 0) {
-      universities = await this.universityModel
-        .find()
-        .select('_id name logo_url slug address_id ranking')
-        .populate('address_id', '_id city state country')
-        .lean()
-        .exec();
-    }
 
     // Fetch active programs needed to calculate verified status, cities, fields, etc.
     const activeAdmissions = await this.admissionModel
@@ -626,19 +682,58 @@ export class ScoringEngineService {
 
     const uniClicks = new Map<string, number>();
     const appliedEventPrograms = new Set<string>();
-    const now = new Date().getTime();
+    const nowTime = new Date().getTime();
     const halfLifeMs = config.HALF_LIFE_DAYS * 24 * 60 * 60 * 1000;
 
     for (const event of events) {
       if (event.resource_type === 'university' && event.event_type === UserRecommendationEventType.CLICK) {
         const key = event.resource_id.toString();
         const eventTime = new Date(event.created_at || now).getTime();
-        const ageMs = Math.max(0, now - eventTime);
+        const ageMs = Math.max(0, nowTime - eventTime);
         const decayFactor = Math.pow(2, -ageMs / halfLifeMs);
 
         uniClicks.set(key, (uniClicks.get(key) || 0) + decayFactor);
       } else if (event.event_type === UserRecommendationEventType.APPLY) {
         appliedEventPrograms.add(event.resource_id.toString());
+      }
+    }
+
+    // Build global clicks map for universities to compute global popularity
+    const globalUniClickCountMap = new Map<string, number>();
+    if (user) {
+      let globalUniClickEvents: any[] = [];
+      if (typeof this.userEventModel.find === 'function') {
+        globalUniClickEvents = await this.userEventModel
+          .find({
+            event_type: { $in: [UserRecommendationEventType.CLICK, UserRecommendationEventType.APPLY] },
+            resource_type: 'university',
+          })
+          .sort({ created_at: -1 })
+          .limit(5000)
+          .lean()
+          .exec();
+      }
+      for (const event of globalUniClickEvents) {
+        const resourceIdStr = event.resource_id.toString();
+        const eventTime = new Date(event.created_at || now).getTime();
+        const ageMs = Math.max(0, nowTime - eventTime);
+        const decayFactor = Math.pow(2, -ageMs / halfLifeMs);
+        const weight = event.event_type === UserRecommendationEventType.APPLY ? (config.APPLICATION_EVENT_POPULARITY_WEIGHT ?? 5.0) : 1.0;
+
+        globalUniClickCountMap.set(resourceIdStr, (globalUniClickCountMap.get(resourceIdStr) || 0) + weight * decayFactor);
+      }
+    } else {
+      // For anonymous users, events parameter contains global events
+      for (const event of events) {
+        if (event.resource_type === 'university' && (event.event_type === UserRecommendationEventType.CLICK || event.event_type === UserRecommendationEventType.APPLY)) {
+          const key = event.resource_id.toString();
+          const eventTime = new Date(event.created_at || now).getTime();
+          const ageMs = Math.max(0, nowTime - eventTime);
+          const decayFactor = Math.pow(2, -ageMs / halfLifeMs);
+          const weight = event.event_type === UserRecommendationEventType.APPLY ? (config.APPLICATION_EVENT_POPULARITY_WEIGHT ?? 5.0) : 1.0;
+
+          globalUniClickCountMap.set(key, (globalUniClickCountMap.get(key) || 0) + weight * decayFactor);
+        }
       }
     }
 
@@ -723,17 +818,31 @@ export class ScoringEngineService {
         matchReasons.push('ScholarBee Verified Partner');
       }
 
+      const globalUniClicks = globalUniClickCountMap.get(uniIdStr) || 0;
+      const f_uni_popularity = Math.min(globalUniClicks / 10.0, 1.0);
+
       let finalScore = 0;
       if (scoringMode === 'onboarding') {
-        finalScore = onboardingScore * mouBoost;
+        const popWeight = config.ONBOARDING_POPULARITY_WEIGHT ?? 0.2;
+        finalScore = ((1.0 - popWeight) * onboardingScore + popWeight * f_uni_popularity) * mouBoost;
+        if (globalUniClicks > 0) {
+          matchReasons.push('Trending University');
+        }
       } else if (scoringMode === 'behavioral') {
-        finalScore = behavioralScore * mouBoost;
+        const popWeight = config.BEHAVIORAL_POPULARITY_WEIGHT ?? 0.1;
+        finalScore = ((1.0 - popWeight) * behavioralScore + popWeight * f_uni_popularity) * mouBoost;
+        if (globalUniClicks > 0) {
+          matchReasons.push('Trending University');
+        }
       } else if (scoringMode === 'hybrid') {
-        finalScore = (0.5 * onboardingScore + 0.5 * behavioralScore) * mouBoost;
+        const popWeight = config.HYBRID_POPULARITY_WEIGHT ?? 0.1;
+        finalScore = ((1.0 - popWeight) * (0.5 * onboardingScore + 0.5 * behavioralScore) + popWeight * f_uni_popularity) * mouBoost;
+        if (globalUniClicks > 0) {
+          matchReasons.push('Trending University');
+        }
       } else {
-        const clickWeight = uniClicks.get(uniIdStr) || 0;
-        finalScore = (0.5 + clickWeight) * mouBoost;
-        if (clickWeight > 0) {
+        finalScore = (0.5 + globalUniClicks) * mouBoost;
+        if (globalUniClicks > 0) {
           matchReasons.push('Trending University');
         }
       }

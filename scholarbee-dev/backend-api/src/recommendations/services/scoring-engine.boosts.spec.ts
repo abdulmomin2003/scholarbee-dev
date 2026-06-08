@@ -33,7 +33,13 @@ describe('ScoringEngineService Boosts (Phase 3 & 5)', () => {
     exec: jest.fn().mockImplementation(() => Promise.resolve([])),
   };
   
-  const mockUserEventModel = {};
+  const mockUserEventModel = {
+    find: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockImplementation(() => Promise.resolve([])),
+  };
   const mockApplicationModel = {};
 
   const mockAdmissionModel = {
