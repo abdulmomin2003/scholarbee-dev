@@ -1,37 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken } from '@nestjs/mongoose';
-import { User } from 'src/users/schemas/user.schema';
 import { RecommendationService } from './recommendation.service';
 import { RecommendationCronService } from './recommendation-cron.service';
 
 describe('RecommendationCronService', () => {
   let cronService: RecommendationCronService;
   let recommendationService: RecommendationService;
-  let mockUserModel: any;
 
   beforeEach(async () => {
-    mockUserModel = {
-      find: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockReturnThis(),
-      exec: jest.fn().mockResolvedValue([
-        { _id: 'student_id_1' },
-        { _id: 'student_id_2' },
-      ]),
-    };
-
     const mockRecommendationService = {
       precomputeTrendingRecommendations: jest.fn().mockResolvedValue(undefined),
-      precomputeStudentRecommendations: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecommendationCronService,
-        {
-          provide: getModelToken(User.name),
-          useValue: mockUserModel,
-        },
         {
           provide: RecommendationService,
           useValue: mockRecommendationService,
@@ -51,7 +33,6 @@ describe('RecommendationCronService', () => {
     it('should call precomputeTrendingRecommendations on recommendation service', async () => {
       await cronService.recomputeTrendingRecommendations();
 
-      // Verify RecommendationService calls
       expect(recommendationService.precomputeTrendingRecommendations).toHaveBeenCalled();
     });
 
