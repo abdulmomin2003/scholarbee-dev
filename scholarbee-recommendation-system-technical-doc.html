@@ -586,6 +586,7 @@
     <nav class="sidebar-nav">
       <span class="nav-label">Overview</span>
       <a href="#summary" class="nav-item active">Executive Summary</a>
+      <a href="#rationale" class="nav-item">Methodology Rationale</a>
       <a href="#architecture" class="nav-item">System Architecture</a>
       <a href="#models" class="nav-item">Data Models</a>
       <a href="#endpoints" class="nav-item">API Endpoints</a>
@@ -651,9 +652,33 @@
       </div>
     </section>
 
-    <!-- 2. System Architecture -->
+    <!-- 2. Design Methodology Rationale -->
+    <section id="rationale">
+      <h2>2. Design Methodology Rationale</h2>
+      <p>
+        Building a recommendation engine for an academic portal introduces unique challenges. Traditional algorithms (like collaborative filtering or static search-based rules) suffer from cold-start limitations, lack real-time reactivity, or require high-overhead background processes. The ScholarBee engine resolves this by implementing an <strong>Adaptive Bayesian Hybrid model</strong>.
+      </p>
+
+      <h3>Why We Chose This Approach</h3>
+      <ul>
+        <li>
+          <strong>Cold-Start Mitigation:</strong> Pure behavioral systems fail when a student first registers. By leveraging demographic onboarding preferences, we establish high-quality baseline recommendations instantly.
+        </li>
+        <li>
+          <strong>Fast-Acting Reactivity:</strong> Setting the behavioral activation threshold to <code>1</code> ensures the student's very first interaction (click, favorite, apply) dynamically shifts rankings, rewarding active exploration immediately.
+        </li>
+        <li>
+          <strong>Mathematical Stability:</strong> Rather than using raw counter ratios which fluctuate wildly with a few clicks, the <strong>Beta-Binomial Bayesian framework</strong> acts as a natural stabilizer. Prior onboarding preferences provide a statistical "inertia" that prevents temporary browsing anomalies from completely skewing the recommendation profile.
+        </li>
+        <li>
+          <strong>Operational Simplicity & Speed:</strong> Heavy machine learning frameworks (e.g., Matrix Factorization, Deep Learning) require dedicated GPU infrastructure, offline training, and complex pipelines. The Bayesian update equations are computationally lightweight, allowing them to execute inline inside the NestJS API thread, backed by gzipped Redis caching.
+        </li>
+      </ul>
+    </section>
+
+    <!-- 3. System Architecture -->
     <section id="architecture">
-      <h2>2. Architecture Overview</h2>
+      <h2>3. Architecture Overview</h2>
       <p>
         The recommendation engine resides inside the <a
           href="file:///d:/STUDY/Fiver/scholarbee-dev/scholarbee-dev/backend-api/src/recommendations">recommendations/</a>
@@ -715,9 +740,9 @@
       </ol>
     </section>
 
-    <!-- 3. Data Models -->
+    <!-- 4. Data Models -->
     <section id="models">
-      <h2>3. Data Models</h2>
+      <h2>4. Data Models</h2>
 
       <h3>Onboarding Preferences</h3>
       <p>
@@ -772,9 +797,9 @@ interface WeightPriors {
 });</code></pre>
     </section>
 
-    <!-- 4. API Endpoints -->
+    <!-- 5. API Endpoints -->
     <section id="endpoints">
-      <h2>4. API Endpoints</h2>
+      <h2>5. API Endpoints</h2>
 
       <h3>1. Fetch Recommendations</h3>
       <p>
@@ -808,9 +833,9 @@ Payload:
       <pre><code>POST /api/v1/recommendations/seed-demo</code></pre>
     </section>
 
-    <!-- 5. Scoring Mode Decision Tree -->
+    <!-- 6. Scoring Mode Decision Tree -->
     <section id="decision-tree">
-      <h2>5. Scoring Mode Decision Tree</h2>
+      <h2>6. Scoring Mode Decision Tree</h2>
       <p>
         The engine identifies one of four scoring modes based on the availability of onboarding preferences and the
         volume of behavioral event history.
@@ -879,9 +904,9 @@ Payload:
       </p>
     </section>
 
-    <!-- 6. Program Scoring Engine -->
+    <!-- 7. Program Scoring Engine -->
     <section id="program-scoring">
-      <h2>6. Program Scoring Engine</h2>
+      <h2>7. Program Scoring Engine</h2>
       <p>
         Programs are scored out of a baseline range of [0.0, 1.0], scaled by boosts.
       </p>
@@ -950,9 +975,9 @@ Payload:
       </ul>
     </section>
 
-    <!-- 7. University Scoring Engine -->
+    <!-- 8. University Scoring Engine -->
     <section id="uni-scoring">
-      <h2>7. University Scoring Engine</h2>
+      <h2>8. University Scoring Engine</h2>
       <p>
         University scoring follows a simplified structure since Bayesian updates are targeted exclusively to
         program-related choices.
@@ -989,9 +1014,9 @@ Payload:
       </div>
     </section>
 
-    <!-- 8. Bayesian Weight System -->
+    <!-- 9. Bayesian Weight System -->
     <section id="bayesian">
-      <h2>8. Bayesian Weight System</h2>
+      <h2>9. Bayesian Weight System</h2>
       <p>
         ScholarBee uses a <strong>Beta-Binomial Bayesian framework</strong> to continuously update onboarding preference
         weights.
@@ -1058,9 +1083,9 @@ Payload:
       </div>
     </section>
 
-    <!-- 9. Knowledge Graph & Taxonomy -->
+    <!-- 10. Knowledge Graph & Taxonomy -->
     <section id="knowledge-graph">
-      <h2>9. Knowledge Graph & Taxonomy</h2>
+      <h2>10. Knowledge Graph & Taxonomy</h2>
       <p>
         The Knowledge Graph performs string cleanup, maps spelling variants to canonical categories, and calculates
         cross-disciplinary similarities.
@@ -1091,9 +1116,9 @@ Payload:
       </ul>
     </section>
 
-    <!-- 10. Caching Layer -->
+    <!-- 11. Caching Layer -->
     <section id="caching">
-      <h2>10. Caching Layer & Performance Optimization</h2>
+      <h2>11. Caching Layer & Performance Optimization</h2>
       <p>
         To prevent heavy database queries on high-traffic pages, recommendation lists are aggressively cached.
       </p>
@@ -1132,9 +1157,9 @@ Payload:
       </div>
     </section>
 
-    <!-- 11. Event Tracking -->
+    <!-- 12. Event Tracking -->
     <section id="tracking">
-      <h2>11. Event Tracking Flow</h2>
+      <h2>12. Event Tracking Flow</h2>
       <p>
         When a user event is logged:
       </p>
@@ -1159,8 +1184,9 @@ Payload:
       </div>
     </section>
 
-    <!-- 12. Interactive Score Simulator -->
+    <!-- 13. Interactive Score Simulator -->
     <section id="simulator">
+      <h2>13. Interactive Score Simulator</h2>
       <div class="simulator">
         <div class="simulator-title">
           <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
@@ -1333,9 +1359,9 @@ Payload:
       </div>
     </section>
 
-    <!-- 13. Configuration Reference Table -->
+    <!-- 14. Configuration Reference Table -->
     <section id="config-reference">
-      <h2>13. Configuration Reference Table</h2>
+      <h2>14. Configuration Reference Table</h2>
       <p>
         The scoring engine utilizes values exported from <a
           href="file:///d:/STUDY/Fiver/scholarbee-dev/scholarbee-dev/backend-api/src/recommendations/constants/scoring.constants.ts">scoring.constants.ts</a>.
@@ -1421,9 +1447,9 @@ Payload:
       </table>
     </section>
 
-    <!-- 14. Demo Test Cases -->
+    <!-- 15. Demo Test Cases -->
     <section id="test-cases">
-      <h2>14. Demo Test Cases Walkthrough</h2>
+      <h2>15. Demo Test Cases Walkthrough</h2>
       <p>
         The system behavior can be tested using the following test scenarios:
       </p>
